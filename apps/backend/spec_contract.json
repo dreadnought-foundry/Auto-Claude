@@ -37,7 +37,14 @@
           "validation": {
             "type": "json",
             "required_fields": ["task_description", "workflow_type", "services_involved"],
-            "workflow_type_values": ["feature", "refactor", "investigation", "migration", "simple"]
+            "optional_fields": ["sprint_type", "coverage_override"],
+            "workflow_type_values": ["feature", "refactor", "investigation", "migration", "simple"],
+            "sprint_type_values": ["fullstack", "backend", "frontend", "research", "spike", "infrastructure"],
+            "sprint_type_default": "fullstack",
+            "coverage_override_schema": {
+              "threshold": {"type": "number", "min": 0, "max": 100, "required": true},
+              "justification": {"type": "string", "min_length": 10, "required": true}
+            }
           }
         }
       },
