@@ -1,4 +1,58 @@
-.PHONY: claude
+.PHONY: claude dev start test test-backend test-maestro run list help
 
+# Show available commands
+help:
+	@echo "Auto-Claude Make Commands:"
+	@echo ""
+	@echo "  make dev           - Start Electron app in dev mode (HMR)"
+	@echo "  make start         - Start Electron app in production mode"
+	@echo "  make run SPEC=001  - Run backend CLI on a spec"
+	@echo "  make list          - List all specs"
+	@echo "  make test          - Run frontend tests"
+	@echo "  make test-backend  - Run backend tests"
+	@echo "  make test-maestro  - Run Maestro integration tests"
+	@echo "  make claude        - Start Claude Code (skip permissions)"
+	@echo ""
+	@echo "Backend CLI examples:"
+	@echo "  make run SPEC=001                    # Run spec 001"
+	@echo "  make run SPEC=001 ARGS='--qa'        # Run QA on spec"
+	@echo "  make run SPEC=001 ARGS='--postmortem' # Generate postmortem"
+	@echo "  make run SPEC=001 ARGS='--review'    # Review spec changes"
+
+# Claude Code with skip permissions
 claude:
 	claude --dangerously-skip-permissions
+
+# Development mode (Electron + Vite HMR)
+dev:
+	cd apps/frontend && npm run dev
+
+# Production mode
+start:
+	cd apps/frontend && npm start
+
+# Run backend CLI (use: make run SPEC=001 or make run SPEC=001 ARGS='--qa')
+run:
+ifndef SPEC
+	@echo "Usage: make run SPEC=<spec-number> [ARGS='<additional-args>']"
+	@echo "Example: make run SPEC=001"
+	@echo "         make run SPEC=001 ARGS='--postmortem'"
+	@exit 1
+endif
+	cd apps/backend && uv run python run.py --spec $(SPEC) $(ARGS)
+
+# List all specs
+list:
+	cd apps/backend && uv run python run.py --list
+
+# Run all frontend tests
+test:
+	cd apps/frontend && npm test
+
+# Run backend tests
+test-backend:
+	cd apps/backend && uv run pytest tests/ -v
+
+# Run Maestro integration tests
+test-maestro:
+	cd apps/backend && uv run pytest tests/test_maestro_state_bridge.py tests/test_postmortem.py tests/test_sprint_types.py -v

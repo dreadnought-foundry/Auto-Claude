@@ -222,6 +222,13 @@ Environment Variables:
         help="Show human review/approval status for a spec",
     )
 
+    # Postmortem generation
+    parser.add_argument(
+        "--postmortem",
+        action="store_true",
+        help="Generate a postmortem report for a completed spec",
+    )
+
     # Non-interactive mode (for UI/automation)
     parser.add_argument(
         "--auto-continue",
@@ -520,6 +527,26 @@ def _run_cli() -> None:
             model=model,
             verbose=args.verbose,
         )
+        return
+
+    # Handle --postmortem command
+    if args.postmortem:
+        from qa.postmortem import PostmortemGenerator
+        from qa.postmortem_writer import write_postmortem
+
+        print(f"\n📝 Generating postmortem for {spec_dir.name}...")
+        try:
+            generator = PostmortemGenerator(project_dir, spec_dir)
+            data = generator.generate()
+            output_path = write_postmortem(data, spec_dir, spec_dir.name)
+            print(f"✓ Postmortem written to: {output_path}")
+            print(f"\n--- Postmortem Preview ---\n")
+            from qa.postmortem_writer import PostmortemWriter
+
+            print(PostmortemWriter(data, spec_dir.name).render())
+        except Exception as e:
+            print(f"✗ Failed to generate postmortem: {e}")
+            sys.exit(1)
         return
 
     # Normal build flow
