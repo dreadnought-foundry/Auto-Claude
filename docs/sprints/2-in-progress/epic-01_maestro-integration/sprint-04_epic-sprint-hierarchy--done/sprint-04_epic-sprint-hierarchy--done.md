@@ -3,12 +3,13 @@ sprint: 4
 title: "Epic Sprint Hierarchy"
 type: backend
 epic: 1
-status: in-progress
+status: done
 created: 2026-01-29T17:03:42Z
 started: 2026-01-29T17:27:39Z
-completed: null
-hours: null
+completed: 2026-01-30
+hours: 15.1
 workflow_version: "3.5.0"
+
 
 ---
 
@@ -196,3 +197,51 @@ Target Files:
 - `apps/backend/cli/epic_commands.py` (new)
 - `.auto-claude/registry.json` (new)
 - `.auto-claude/epics/` (new directory)
+
+## Postmortem
+
+### What Went Well
+
+1. **TDD approach** - Writing tests first caught markdown parsing bugs early (the table row parsing issue where "Spec" in a title would break parsing)
+2. **Clean separation of concerns** - Epic class handles serialization, Registry handles persistence, Lifecycle handles business logic
+3. **Minimal invasiveness** - Feature is optional; existing spec workflow unchanged
+4. **Frontend integration** - Epic selection dropdown only appears when epics exist, keeping UI clean for users who don't use epics
+
+### What Could Be Improved
+
+1. **Context compaction** - Session ran out of context during implementation, requiring continuation
+2. **Pre-existing test failures** - 5 tests in `test_qa_criteria.py` are failing (unrelated to this sprint) - should be addressed
+
+### Implementation Summary
+
+**Backend (99 tests passing):**
+- `apps/backend/spec/epic.py` - Epic class with markdown serialization
+- `apps/backend/spec/registry.py` - Central registry with JSON persistence
+- `apps/backend/spec/epic_lifecycle.py` - Auto-completion detection
+- `apps/backend/cli/epic_commands.py` - CLI commands (epic-new, epic-list, epic-status, epic-complete)
+
+**Frontend:**
+- IPC handlers for `epic:list` and `epic:create`
+- Epic dropdown in TaskCreationWizard
+- i18n translations (en + fr)
+
+**Test Files:**
+- `tests/test_epic.py` (34 tests)
+- `tests/test_registry.py` (28 tests)
+- `tests/test_epic_lifecycle.py` (19 tests)
+- `tests/test_epic_commands.py` (18 tests)
+
+### Key Decisions
+
+1. **Per-project epic numbering** - Each project has its own epic 1, 2, 3 (not global)
+2. **Warn + force for incomplete completion** - `epic-complete` warns if criteria not met, requires `--force` to override
+3. **Markdown storage** - Epics stored as human-readable markdown with JSON metadata in HTML comments
+
+### Hours Breakdown
+
+- Planning: 2.0h
+- Backend implementation: 5.0h
+- Frontend integration: 3.0h
+- Testing & debugging: 4.0h
+- Quality review & linting: 1.1h
+- **Total: 15.1h**
