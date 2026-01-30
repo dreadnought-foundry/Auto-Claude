@@ -12,7 +12,7 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, ChevronDown, ChevronUp, RotateCcw, FolderTree, GitBranch, Info } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, RotateCcw, FolderTree, GitBranch, Info, Layers } from 'lucide-react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Combobox, type ComboboxOption } from './ui/combobox';
@@ -24,7 +24,7 @@ import { FileAutocomplete } from './FileAutocomplete';
 import { createTask, saveDraft, loadDraft, clearDraft, isDraftEmpty } from '../stores/task-store';
 import { useProjectStore } from '../stores/project-store';
 import { cn } from '../lib/utils';
-import type { TaskCategory, TaskPriority, TaskComplexity, TaskImpact, TaskMetadata, ImageAttachment, TaskDraft, ModelType, ThinkingLevel, ReferencedFile } from '../../shared/types';
+import type { TaskCategory, TaskPriority, TaskComplexity, TaskImpact, TaskMetadata, ImageAttachment, TaskDraft, ModelType, ThinkingLevel, ReferencedFile, EpicSummary } from '../../shared/types';
 import type { PhaseModelConfig, PhaseThinkingConfig } from '../../shared/types/settings';
 import {
   DEFAULT_AGENT_PROFILES,
@@ -70,6 +70,11 @@ export function TaskCreationWizard({
   // Worktree isolation - default to true for safety
   const [useWorktree, setUseWorktree] = useState(true);
 
+  // Epic selection state (Maestro-style work organization)
+  const [epics, setEpics] = useState<EpicSummary[]>([]);
+  const [selectedEpic, setSelectedEpic] = useState<number | null>(null);
+  const [isLoadingEpics, setIsLoadingEpics] = useState(false);
+
   // Get project path from project store
   const projects = useProjectStore((state) => state.projects);
   const projectPath = useMemo(() => {
@@ -92,6 +97,20 @@ export function TaskCreationWizard({
     });
     return options;
   }, [branches, projectDefaultBranch, t]);
+
+  // Convert epics to ComboboxOption[] format
+  const epicOptions: ComboboxOption[] = useMemo(() => {
+    const options: ComboboxOption[] = [
+      { value: '', label: t('tasks:wizard.epicOptions.none', 'No epic (standalone task)') }
+    ];
+    epics.filter(e => e.status === 'active').forEach((epic) => {
+      options.push({
+        value: String(epic.number),
+        label: `${epic.number.toString().padStart(3, '0')} - ${epic.title} (${epic.specsCompleted}/${epic.specsTotal})`
+      });
+    });
+    return options;
+  }, [epics, t]);
 
   // Classification fields
   const [category, setCategory] = useState<TaskCategory | ''>('');
@@ -223,9 +242,25 @@ export function TaskCreationWizard({
       }
     };
 
+    const fetchEpics = async () => {
+      if (!projectId) return;
+      if (isMounted) setIsLoadingEpics(true);
+      try {
+        const result = await window.electronAPI.listEpics(projectId);
+        if (isMounted && result.success && result.data) {
+          setEpics(result.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch epics:', err);
+      } finally {
+        if (isMounted) setIsLoadingEpics(false);
+      }
+    };
+
     if (open && projectPath) {
       fetchBranches();
       fetchProjectDefaultBranch();
+      fetchEpics();
     }
 
     return () => {
@@ -432,6 +467,8 @@ export function TaskCreationWizard({
       }
       // Pass worktree preference - false means use --direct mode
       if (!useWorktree) metadata.useWorktree = false;
+      // Epic association (Maestro-style work organization)
+      if (selectedEpic) metadata.epicNumber = selectedEpic;
 
       const task = await createTask(projectId, title.trim(), description.trim(), metadata);
       if (task) {
@@ -465,6 +502,7 @@ export function TaskCreationWizard({
     setRequireReviewBeforeCoding(false);
     setBaseBranch(PROJECT_DEFAULT_BRANCH);
     setUseWorktree(true);
+    setSelectedEpic(null);
     setError(null);
     setShowClassification(false);
     setShowFileExplorer(false);
@@ -662,6 +700,29 @@ export function TaskCreationWizard({
             />
           )}
         </TaskFormFields>
+
+        {/* Epic Selection - show only if epics exist */}
+        {epics.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Layers className="h-4 w-4" />
+              {t('tasks:wizard.epicOptions.label', 'Epic (optional)')}
+            </Label>
+            <Combobox
+              value={selectedEpic ? String(selectedEpic) : ''}
+              onValueChange={(v) => setSelectedEpic(v ? parseInt(v, 10) : null)}
+              options={epicOptions}
+              placeholder={t('tasks:wizard.epicOptions.placeholder', 'Select an epic...')}
+              searchPlaceholder={t('tasks:wizard.epicOptions.search', 'Search epics...')}
+              emptyMessage={t('tasks:wizard.epicOptions.empty', 'No epics found')}
+              disabled={isCreating || isLoadingEpics}
+              className="h-9"
+            />
+            <p className="text-xs text-muted-foreground">
+              {t('tasks:wizard.epicOptions.helpText', 'Group this task under an epic for organization')}
+            </p>
+          </div>
+        )}
 
         {/* Git Options Toggle - unique to creation */}
         <button

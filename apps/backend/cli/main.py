@@ -280,6 +280,37 @@ Environment Variables:
         help="Actually delete files in cleanup (not just preview)",
     )
 
+    # Epic management commands
+    parser.add_argument(
+        "--epic-new",
+        type=str,
+        metavar="TITLE",
+        help="Create a new epic with the given title",
+    )
+    parser.add_argument(
+        "--epic-list",
+        action="store_true",
+        help="List all epics and their status",
+    )
+    parser.add_argument(
+        "--epic-status",
+        type=int,
+        metavar="N",
+        help="Show detailed status of epic N",
+    )
+    parser.add_argument(
+        "--epic-complete",
+        type=int,
+        metavar="N",
+        help="Manually complete epic N",
+    )
+    parser.add_argument(
+        "--epic",
+        type=int,
+        metavar="N",
+        help="Associate new spec with epic N",
+    )
+
     return parser.parse_args()
 
 
@@ -341,6 +372,33 @@ def _run_cli() -> None:
     # Handle --cleanup-worktrees command
     if args.cleanup_worktrees:
         handle_cleanup_worktrees_command(project_dir)
+        return
+
+    # Handle epic commands
+    if args.epic_new:
+        from cli.epic_commands import handle_epic_new
+
+        handle_epic_new(project_dir, args.epic_new, interactive=True)
+        return
+
+    if args.epic_list:
+        from cli.epic_commands import handle_epic_list
+
+        handle_epic_list(project_dir)
+        return
+
+    if args.epic_status:
+        from cli.epic_commands import handle_epic_status
+
+        handle_epic_status(project_dir, args.epic_status)
+        return
+
+    if args.epic_complete:
+        from cli.epic_commands import handle_epic_complete
+
+        result = handle_epic_complete(project_dir, args.epic_complete, force=args.force)
+        if not result.get("success"):
+            sys.exit(1)
         return
 
     # Handle batch commands

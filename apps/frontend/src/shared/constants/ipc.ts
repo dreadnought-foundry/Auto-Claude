@@ -228,6 +228,10 @@ export const IPC_CHANNELS = {
   IDEATION_TYPE_COMPLETE: 'ideation:typeComplete',
   IDEATION_TYPE_FAILED: 'ideation:typeFailed',
 
+  // Epic management (Maestro-style work organization)
+  EPIC_LIST: 'epic:list',
+  EPIC_CREATE: 'epic:create',
+
   // Linear integration
   LINEAR_GET_TEAMS: 'linear:getTeams',
   LINEAR_GET_PROJECTS: 'linear:getProjects',

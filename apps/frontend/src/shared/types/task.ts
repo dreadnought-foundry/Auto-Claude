@@ -157,6 +157,15 @@ export interface TaskDraft {
   savedAt: Date;
 }
 
+// Epic summary for UI display (Maestro-style work organization)
+export interface EpicSummary {
+  number: number;
+  title: string;
+  status: 'active' | 'completed' | 'archived';
+  specsCompleted: number;
+  specsTotal: number;
+}
+
 // Task metadata from ideation or manual entry
 export type TaskComplexity = 'trivial' | 'small' | 'medium' | 'large' | 'complex';
 export type TaskImpact = 'low' | 'medium' | 'high' | 'critical';
@@ -241,6 +250,9 @@ export interface TaskMetadata {
   // Archive status
   archivedAt?: string;  // ISO date when task was archived
   archivedInVersion?: string;  // Version in which task was archived (from changelog)
+
+  // Epic association (Maestro-style work organization)
+  epicNumber?: number;  // Epic number this task belongs to (optional)
 }
 
 export interface Task {

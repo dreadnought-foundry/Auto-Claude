@@ -3,12 +3,13 @@ sprint: 4
 title: "Epic Sprint Hierarchy"
 type: backend
 epic: 1
-status: planning
+status: in-progress
 created: 2026-01-29T17:03:42Z
-started: null
+started: 2026-01-29T17:27:39Z
 completed: null
 hours: null
 workflow_version: "3.5.0"
+
 ---
 
 # Sprint 4: Epic Sprint Hierarchy

@@ -207,6 +207,14 @@
       "useWorktreeLabel": "Use isolated workspace (recommended)",
       "useWorktreeDescription": "Creates changes in a separate git worktree for safe review before merging. Disable to build directly in your project (faster but riskier)."
     },
+    "epicOptions": {
+      "label": "Epic (optional)",
+      "placeholder": "Select an epic...",
+      "search": "Search epics...",
+      "empty": "No epics found",
+      "none": "No epic (standalone task)",
+      "helpText": "Group this task under an epic for organization"
+    },
     "errors": {
       "createFailed": "Failed to create task. Please try again."
     }

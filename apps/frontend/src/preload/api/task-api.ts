@@ -14,7 +14,8 @@ import type {
   SupportedTerminal,
   WorktreeCreatePROptions,
   WorktreeCreatePRResult,
-  ImageAttachment
+  ImageAttachment,
+  EpicSummary
 } from '../../shared/types';
 
 export interface TaskAPI {
@@ -84,6 +85,10 @@ export interface TaskAPI {
   unwatchTaskLogs: (specId: string) => Promise<IPCResult>;
   onTaskLogsChanged: (callback: (specId: string, logs: TaskLogs) => void) => () => void;
   onTaskLogsStream: (callback: (specId: string, chunk: TaskLogStreamChunk) => void) => () => void;
+
+  // Epic Operations (Maestro-style work organization)
+  listEpics: (projectId: string) => Promise<IPCResult<EpicSummary[]>>;
+  createEpic: (projectId: string, title: string, description?: string) => Promise<IPCResult<{ epicNumber: number }>>;
 }
 
 export const createTaskAPI = (): TaskAPI => ({
@@ -308,5 +313,12 @@ export const createTaskAPI = (): TaskAPI => ({
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.TASK_LOGS_STREAM, handler);
     };
-  }
+  },
+
+  // Epic Operations (Maestro-style work organization)
+  listEpics: (projectId: string): Promise<IPCResult<EpicSummary[]>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.EPIC_LIST, projectId),
+
+  createEpic: (projectId: string, title: string, description?: string): Promise<IPCResult<{ epicNumber: number }>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.EPIC_CREATE, projectId, title, description)
 });
