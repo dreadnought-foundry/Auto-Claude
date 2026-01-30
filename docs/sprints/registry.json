@@ -26,13 +26,13 @@
     },
     "3": {
       "title": "Postmortem Generation",
-      "status": "planning",
+      "status": "done",
       "epic": 1,
       "type": "fullstack",
       "created": "2026-01-29",
       "started": null,
-      "completed": null,
-      "hours": null
+      "completed": "2026-01-30",
+      "hours": 8.4
     },
     "4": {
       "title": "Epic Sprint Hierarchy",
@@ -53,7 +53,7 @@
       "started": null,
       "completed": null,
       "totalSprints": 9,
-      "completedSprints": 3,
+      "completedSprints": 4,
       "estimatedHours": 42.0
     }
   },
