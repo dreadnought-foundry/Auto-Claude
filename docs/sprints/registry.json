@@ -6,13 +6,13 @@
   "sprints": {
     "1": {
       "title": "Quality Gate Integration",
-      "status": "planning",
+      "status": "done",
       "epic": 1,
       "type": "fullstack",
       "created": "2026-01-29",
       "started": null,
-      "completed": null,
-      "hours": null
+      "completed": "2026-01-30",
+      "hours": 24.1
     },
     "2": {
       "title": "State Synchronization",
@@ -53,7 +53,7 @@
       "started": null,
       "completed": null,
       "totalSprints": 9,
-      "completedSprints": 2,
+      "completedSprints": 3,
       "estimatedHours": 42.0
     }
   },

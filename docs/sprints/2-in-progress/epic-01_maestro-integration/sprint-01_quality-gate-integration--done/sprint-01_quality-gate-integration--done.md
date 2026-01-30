@@ -3,12 +3,13 @@ sprint: 1
 title: "Quality Gate Integration"
 type: backend
 epic: 1
-status: in-progress
+status: done
 created: 2026-01-29T17:03:35Z
 started: 2026-01-29T17:27:28Z
-completed: null
+completed: 2026-01-30
 hours: null
 workflow_version: "3.5.0"
+
 
 ---
 
