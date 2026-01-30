@@ -1,0 +1,62 @@
+{
+  "counters": {
+    "next_sprint": 5,
+    "next_epic": 1
+  },
+  "sprints": {
+    "1": {
+      "title": "Quality Gate Integration",
+      "status": "planning",
+      "epic": 1,
+      "type": "fullstack",
+      "created": "2026-01-29",
+      "started": null,
+      "completed": null,
+      "hours": null
+    },
+    "2": {
+      "title": "State Synchronization",
+      "status": "planning",
+      "epic": 1,
+      "type": "fullstack",
+      "created": "2026-01-29",
+      "started": null,
+      "completed": null,
+      "hours": null
+    },
+    "3": {
+      "title": "Postmortem Generation",
+      "status": "planning",
+      "epic": 1,
+      "type": "fullstack",
+      "created": "2026-01-29",
+      "started": null,
+      "completed": null,
+      "hours": null
+    },
+    "4": {
+      "title": "Epic Sprint Hierarchy",
+      "status": "planning",
+      "epic": 1,
+      "type": "fullstack",
+      "created": "2026-01-29",
+      "started": null,
+      "completed": null,
+      "hours": null
+    }
+  },
+  "epics": {
+    "1": {
+      "title": "Maestro Integration",
+      "status": "planning",
+      "created": "2026-01-29",
+      "started": null,
+      "completed": null,
+      "totalSprints": 9,
+      "completedSprints": 0,
+      "estimatedHours": 42.0
+    }
+  },
+  "nextEpicNumber": 2,
+  "nextSprintNumber": 5
+}

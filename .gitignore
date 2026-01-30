@@ -165,7 +165,8 @@ dev/
 _bmad/
 _bmad-output/
 .claude/
-/docs
+/docs/*
+!/docs/sprints/
 OPUS_ANALYSIS_AND_IDEAS.md
 /.github/agents
 
@@ -175,3 +176,7 @@ OPUS_ANALYSIS_AND_IDEAS.md
 logs/security/
 Agents.md
 packages/
+
+# Sprint workflow state files
+.claude/sprint-*-state.json
+.claude/product-state.json
