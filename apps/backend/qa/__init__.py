@@ -8,9 +8,11 @@ Modular QA validation system with:
 - Recurring issue detection
 - QA reviewer and fixer agents
 - Main orchestration loop
+- Maestro quality gate integration
 
 Usage:
     from qa import run_qa_validation_loop, should_run_qa, is_qa_approved
+    from qa import MaestroQualityGate, run_quality_gate_sync
 
 Module structure:
     - loop.py: Main QA orchestration loop
@@ -18,6 +20,8 @@ Module structure:
     - fixer.py: QA fixer agent session
     - report.py: Issue tracking, reporting, escalation
     - criteria.py: Acceptance criteria and status management
+    - preflight_checklist.py: 9-item pre-flight checklist
+    - maestro_adapter.py: Maestro quality gate adapter
 """
 
 # Configuration constants
@@ -62,6 +66,19 @@ from .report import (
 # Agent sessions
 from .reviewer import run_qa_agent_session
 
+# Maestro quality gate
+from .maestro_adapter import (
+    MaestroQualityGate,
+    run_quality_gate_sync,
+)
+from .preflight_checklist import (
+    CheckBehavior,
+    CheckResult,
+    PreflightChecklist,
+    PreflightResult,
+    CHECK_BEHAVIORS,
+)
+
 # Public API
 __all__ = [
     # Configuration
@@ -96,4 +113,12 @@ __all__ = [
     "run_qa_agent_session",
     "load_qa_fixer_prompt",
     "run_qa_fixer_session",
+    # Maestro quality gate
+    "MaestroQualityGate",
+    "run_quality_gate_sync",
+    "CheckBehavior",
+    "CheckResult",
+    "PreflightChecklist",
+    "PreflightResult",
+    "CHECK_BEHAVIORS",
 ]
