@@ -8,7 +8,7 @@
 | Started | N/A |
 | Completed | N/A |
 | Duration | N/A hours |
-| Steps Completed | 14 |
+| Steps Completed | N/A |
 | Files Changed | TODO: Run `git diff --stat` |
 | Tests Added | TODO: Count test functions |
 | Coverage Delta | TODO: Compare coverage |
