@@ -5,7 +5,7 @@ import { AgentState } from './agent-state';
 import { AgentEvents } from './agent-events';
 import { AgentProcessManager } from './agent-process';
 import { AgentQueueManager } from './agent-queue';
-import { getClaudeProfileManager, initializeClaudeProfileManager } from '../claude-profile-manager';
+import { getClaudeProfileManager, initializeClaudeProfileManager, type ClaudeProfileManager } from '../claude-profile-manager';
 import {
   SpecCreationMetadata,
   TaskExecutionOptions,
@@ -97,7 +97,7 @@ export class AgentManager extends EventEmitter {
   ): Promise<void> {
     // Pre-flight auth check: Verify active profile has valid authentication
     // Ensure profile manager is initialized to prevent race condition
-    let profileManager;
+    let profileManager: ClaudeProfileManager;
     try {
       profileManager = await initializeClaudeProfileManager();
     } catch (error) {
@@ -190,7 +190,7 @@ export class AgentManager extends EventEmitter {
   ): Promise<void> {
     // Pre-flight auth check: Verify active profile has valid authentication
     // Ensure profile manager is initialized to prevent race condition
-    let profileManager;
+    let profileManager: ClaudeProfileManager;
     try {
       profileManager = await initializeClaudeProfileManager();
     } catch (error) {

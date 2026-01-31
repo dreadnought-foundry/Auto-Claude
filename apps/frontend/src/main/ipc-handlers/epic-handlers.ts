@@ -81,7 +81,7 @@ async function getEpicsFromRegistry(projectPath: string): Promise<EpicSummary[]>
     const epics: EpicSummary[] = [];
 
     if (registry.epics) {
-      for (const [numStr, epic] of Object.entries(registry.epics)) {
+      for (const [_numStr, epic] of Object.entries(registry.epics)) {
         const epicData = epic as {
           number: number;
           title: string;
@@ -158,7 +158,7 @@ export function registerEpicHandlers(): void {
       _,
       projectId: string,
       title: string,
-      description?: string
+      _description?: string
     ): Promise<IPCResult<{ epicNumber: number }>> => {
       const project = projectStore.getProject(projectId);
       if (!project) {

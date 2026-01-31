@@ -629,9 +629,9 @@ describe('Task Store', () => {
   describe('updateTaskFromPlan - validation and subtask creation edge cases', () => {
     beforeEach(() => {
       // Spy on console methods to test validation logging and prevent crashes
-      vi.spyOn(console, 'log').mockImplementation(() => {});
-      vi.spyOn(console, 'warn').mockImplementation(() => {});
-      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => undefined);
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      vi.spyOn(console, 'error').mockImplementation(() => undefined);
     });
 
     afterEach(() => {

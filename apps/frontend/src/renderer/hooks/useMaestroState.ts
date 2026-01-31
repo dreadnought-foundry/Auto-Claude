@@ -119,7 +119,7 @@ export function useMaestroState({
         window.electronAPI.unwatchMaestroState(projectId).catch(console.error);
       }
     };
-  }, [projectId, autoWatch]); // Note: intentionally not including startWatching to avoid re-triggering
+  }, [projectId, autoWatch, startWatching]); // Note: intentionally not including startWatching to avoid re-triggering
 
   return {
     state,

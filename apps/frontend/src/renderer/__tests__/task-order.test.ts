@@ -272,7 +272,7 @@ describe('Task Order State Management', () => {
 
     it('should handle corrupted localStorage data gracefully', () => {
       // Spy on console.error to verify error logging
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
       localStorage.setItem('task-order-state-project-1', 'invalid-json{{{');
 
@@ -296,7 +296,7 @@ describe('Task Order State Management', () => {
 
     it('should handle localStorage access errors', () => {
       // Spy on console.error
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
       // Mock localStorage.getItem to throw
       const originalGetItem = localStorage.getItem;
@@ -359,7 +359,7 @@ describe('Task Order State Management', () => {
 
     it('should handle localStorage write errors gracefully', () => {
       // Spy on console.error
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
       const order = createTestTaskOrder({ backlog: ['task-1'] });
       useTaskStore.setState({ taskOrder: order });
@@ -418,7 +418,7 @@ describe('Task Order State Management', () => {
     });
 
     it('should handle localStorage removal errors gracefully', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
       // Mock localStorage.removeItem to throw
       const originalRemoveItem = localStorage.removeItem;
@@ -589,7 +589,7 @@ describe('Task Order State Management', () => {
 
   describe('localStorage persistence edge cases', () => {
     it('should handle empty string in localStorage', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
       localStorage.setItem('task-order-state-project-1', '');
 

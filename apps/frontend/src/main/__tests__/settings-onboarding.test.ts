@@ -244,23 +244,25 @@ describe('SETTINGS_CLAUDE_CODE_GET_ONBOARDING_STATUS handler', () => {
       const { existsSync, readFileSync } = await import('fs');
 
       // Save original mock implementations to restore after test
-      const originalExistsSync = (existsSync as any).getMockImplementation();
-      const originalReadFileSync = (readFileSync as any).getMockImplementation();
+      const mockedExistsSync = vi.mocked(existsSync);
+      const mockedReadFileSync = vi.mocked(readFileSync);
+      const originalExistsSync = mockedExistsSync.getMockImplementation();
+      const originalReadFileSync = mockedReadFileSync.getMockImplementation();
 
       // Override existsSync to make file appear to exist
-      (existsSync as any).mockImplementation((path: string) => {
-        if (path === claudeJsonPath) {
+      mockedExistsSync.mockImplementation((filePath: string) => {
+        if (filePath === claudeJsonPath) {
           return true; // File appears to exist
         }
-        return originalExistsSync ? originalExistsSync(path) : false;
+        return originalExistsSync ? originalExistsSync(filePath) : false;
       });
 
       // Override readFileSync to throw error for our specific file
-      (readFileSync as any).mockImplementation((path: string) => {
-        if (path === claudeJsonPath) {
-          throw new Error('EACCES: permission denied, open \'' + path + '\'');
+      mockedReadFileSync.mockImplementation((filePath: string) => {
+        if (filePath === claudeJsonPath) {
+          throw new Error('EACCES: permission denied, open \'' + filePath + '\'');
         }
-        return originalReadFileSync ? originalReadFileSync(path) : '';
+        return originalReadFileSync ? originalReadFileSync(filePath) : '';
       });
 
       const result = await onboardingStatusHandler({}, null) as {
@@ -272,8 +274,8 @@ describe('SETTINGS_CLAUDE_CODE_GET_ONBOARDING_STATUS handler', () => {
       expect(result.data?.hasCompletedOnboarding).toBe(false);
 
       // Restore original mocks
-      (existsSync as any).mockImplementation(originalExistsSync);
-      (readFileSync as any).mockImplementation(originalReadFileSync);
+      mockedExistsSync.mockImplementation(originalExistsSync as typeof existsSync);
+      mockedReadFileSync.mockImplementation(originalReadFileSync as typeof readFileSync);
     });
   });
 });

@@ -7,7 +7,7 @@
  */
 
 import type { Task, TaskStatus, UnifiedTask } from '@shared/types';
-import { MAESTRO_PHASE_TO_COLUMN, type TaskStatusColumn } from '@shared/constants/task';
+import { MAESTRO_PHASE_TO_COLUMN, } from '@shared/constants/task';
 
 /**
  * Map Maestro unified status to Kanban TaskStatus
