@@ -1,4 +1,4 @@
-.PHONY: claude dev start test test-backend test-maestro run list help
+.PHONY: claude dev start test test-backend test-maestro test-unified sync-unified run list help
 
 # Get the directory where this Makefile lives (works from any directory)
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -14,6 +14,8 @@ help:
 	@echo "  make test          - Run frontend tests"
 	@echo "  make test-backend  - Run backend tests"
 	@echo "  make test-maestro  - Run Maestro integration tests"
+	@echo "  make test-unified  - Run unified state tests (Auto Claude + cross-system)"
+	@echo "  make sync-unified  - Sync unified_state.py to Maestro"
 	@echo "  make claude        - Start Claude Code (skip permissions)"
 	@echo ""
 	@echo "Backend CLI examples:"
@@ -59,3 +61,12 @@ test-backend:
 # Run Maestro integration tests
 test-maestro:
 	cd "$(MAKEFILE_DIR)apps/backend" && uv run pytest tests/test_maestro_state_bridge.py tests/test_postmortem.py tests/test_sprint_types.py -v
+
+# Run unified state tests (Auto Claude + cross-system)
+test-unified:
+	cd "$(MAKEFILE_DIR)apps/backend" && uv run pytest spec/tests/test_unified_state.py -v
+	python3 ~/.claude/tests/test_cross_system_integration.py
+
+# Sync unified_state.py from Auto Claude to Maestro
+sync-unified:
+	python3 "$(MAKEFILE_DIR)scripts/sync_unified_state.py"
