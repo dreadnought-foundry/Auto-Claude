@@ -515,3 +515,38 @@ export interface TaskStartOptions {
   model?: string;
   baseBranch?: string; // Override base branch for worktree creation
 }
+
+/**
+ * Unified state format from .claude/task-state.json
+ * Used for Maestro pipeline integration with Kanban board
+ */
+export interface UnifiedTaskState {
+  version: string;
+  projectRoot: string;
+  tasks: UnifiedTask[];
+  lastUpdated: string;
+}
+
+/**
+ * Task entry in the unified state file
+ * Shared between Maestro and Auto Claude pipelines
+ */
+export interface UnifiedTask {
+  id: string;
+  title: string;
+  pipeline: 'autonomous' | 'maestro';
+  status: 'pending' | 'in_progress' | 'blocked' | 'completed' | 'failed';
+  phase?: string;
+  step?: string;
+  completedSteps?: string[];
+  subtasks?: Array<{ id: string; status: string }>;
+  sprintFile?: string;
+  specDir?: string;
+  created: string;
+  started?: string;
+  completed?: string;
+  sprintType?: string;
+  epicNumber?: number;
+  currentSubtask?: string;
+  error?: string;
+}

@@ -618,6 +618,10 @@ export interface ElectronAPI {
     callback: (projectId: string, error: string) => void
   ) => () => void;
 
+  // Epic operations (Maestro-style work organization)
+  listEpics: (projectId: string) => Promise<IPCResult<import('./task').EpicSummary[]>>;
+  createEpic: (projectId: string, title: string, description?: string) => Promise<IPCResult<{ epicNumber: number }>>;
+
   // Ideation operations
   getIdeation: (projectId: string) => Promise<IPCResult<IdeationSession | null>>;
   generateIdeation: (projectId: string, config: IdeationConfig) => void;
@@ -870,6 +874,14 @@ export interface ElectronAPI {
   // Screenshot capture operations
   getSources: () => Promise<IPCResult<ScreenshotSource[]> & { devMode?: boolean }>;
   capture: (options: { sourceId: string }) => Promise<IPCResult<string>>;
+
+  // Maestro state operations (unified state for pipeline integration)
+  getMaestroState: (projectId: string) => Promise<IPCResult<import('./task').UnifiedTaskState | null>>;
+  watchMaestroState: (projectId: string) => Promise<IPCResult<void>>;
+  unwatchMaestroState: (projectId: string) => Promise<IPCResult<void>>;
+  onMaestroStateUpdate: (
+    callback: (event: unknown, data: { projectId: string; state: import('./task').UnifiedTaskState }) => void
+  ) => () => void;
 
   // Queue Routing API (rate limit recovery)
   queue: import('../../preload/api/queue-api').QueueAPI;

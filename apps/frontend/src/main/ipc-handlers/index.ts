@@ -35,6 +35,7 @@ import { registerProfileHandlers } from './profile-handlers';
 import { registerScreenshotHandlers } from './screenshot-handlers';
 import { registerTerminalWorktreeIpcHandlers } from './terminal';
 import { registerEpicHandlers } from './epic-handlers';
+import { registerMaestroHandlers } from './maestro-handlers';
 import { notificationService } from '../notification-service';
 
 /**
@@ -126,6 +127,9 @@ export function setupIpcHandlers(
   // Epic handlers (Maestro-style work organization)
   registerEpicHandlers();
 
+  // Maestro state handlers (unified state for Maestro pipeline integration)
+  registerMaestroHandlers(getMainWindow);
+
   console.warn('[IPC] All handler modules registered successfully');
 }
 
@@ -154,5 +158,6 @@ export {
   registerMcpHandlers,
   registerProfileHandlers,
   registerScreenshotHandlers,
-  registerEpicHandlers
+  registerEpicHandlers,
+  registerMaestroHandlers
 };

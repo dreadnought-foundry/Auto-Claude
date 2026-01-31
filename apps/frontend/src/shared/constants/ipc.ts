@@ -571,5 +571,13 @@ export const IPC_CHANNELS = {
   // Queue routing events (main -> renderer)
   QUEUE_PROFILE_SWAPPED: 'queue:profileSwapped',      // Task switched to different profile
   QUEUE_SESSION_CAPTURED: 'queue:sessionCaptured',    // Session ID captured from running task
-  QUEUE_BLOCKED_NO_PROFILES: 'queue:blockedNoProfiles' // All profiles unavailable
+  QUEUE_BLOCKED_NO_PROFILES: 'queue:blockedNoProfiles', // All profiles unavailable
+
+  // Maestro state operations (unified state system for Maestro pipeline)
+  MAESTRO_STATE_GET: 'maestro:stateGet',              // Get current unified state for project
+  MAESTRO_STATE_WATCH: 'maestro:stateWatch',          // Start watching state file for changes
+  MAESTRO_STATE_UNWATCH: 'maestro:stateUnwatch',      // Stop watching state file
+
+  // Maestro state events (main -> renderer)
+  MAESTRO_STATE_UPDATE: 'maestro:stateUpdate'         // State file changed (debounced)
 } as const;

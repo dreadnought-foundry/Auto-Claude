@@ -6,7 +6,7 @@
  * for better code organization and maintainability.
  */
 
-import type { ElectronAPI } from '../../shared/types';
+import type { ElectronAPI, UnifiedTaskState } from '../../shared/types';
 import {
   projectMock,
   taskMock,
@@ -345,6 +345,34 @@ const browserMockAPI: ElectronAPI = {
     success: false,
     error: 'Screenshot capture not available in browser mode'
   }),
+
+  // Epic operations (Maestro-style work organization)
+  listEpics: async (_projectId: string) => ({
+    success: true,
+    data: []
+  }),
+  createEpic: async (_projectId: string, _title: string, _description?: string) => ({
+    success: true,
+    data: { epicNumber: 1 }
+  }),
+
+  // Maestro state operations
+  getMaestroState: async (_projectId: string) => ({
+    success: true,
+    data: null
+  }),
+  watchMaestroState: async (_projectId: string) => ({
+    success: true,
+    data: undefined
+  }),
+  unwatchMaestroState: async (_projectId: string) => ({
+    success: true,
+    data: undefined
+  }),
+  onMaestroStateUpdate: (_callback: (event: unknown, data: { projectId: string; state: UnifiedTaskState }) => void) => {
+    // No-op in browser mode
+    return () => {};
+  },
 
   // Debug Operations
   getDebugInfo: async () => ({
