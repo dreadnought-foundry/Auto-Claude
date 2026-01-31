@@ -98,7 +98,7 @@ function extractSprintNumber(sprintFile: string): number | null {
   if (!match) return null;
 
   const sprintNumber = parseInt(match[1], 10);
-  return isNaN(sprintNumber) ? null : sprintNumber;
+  return Number.isNaN(sprintNumber) ? null : sprintNumber;
 }
 
 /**
