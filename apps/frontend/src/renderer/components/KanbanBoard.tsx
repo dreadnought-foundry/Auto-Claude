@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useViewState } from '../contexts/ViewStateContext';
+import { useMaestroState } from '../hooks/useMaestroState';
+import { convertUnifiedTasksToTasks, mergeTasks } from '../utils/maestro-task-converter';
 import {
   DndContext,
   DragOverlay,
@@ -657,6 +659,21 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   const project = projectId ? projects.find((p) => p.id === projectId) : undefined;
   const maxParallelTasks = project?.settings?.maxParallelTasks ?? 3;
 
+  // Maestro unified state - watches for Maestro pipeline task updates
+  const { maestroTasks: unifiedMaestroTasks } = useMaestroState({
+    projectId: projectId || null,
+    autoWatch: true,
+  });
+
+  // Convert and merge Maestro tasks with autonomous tasks
+  const allTasks = useMemo(() => {
+    if (!projectId || unifiedMaestroTasks.length === 0) {
+      return tasks;
+    }
+    const convertedMaestroTasks = convertUnifiedTasksToTasks(unifiedMaestroTasks, projectId);
+    return mergeTasks(tasks, convertedMaestroTasks);
+  }, [tasks, unifiedMaestroTasks, projectId]);
+
   // Queue settings modal state
   const [showQueueSettings, setShowQueueSettings] = useState(false);
   // Store projectId when modal opens to prevent modal from disappearing if tasks change
@@ -690,8 +707,8 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
   // Calculate archived count for Done column button
   const archivedCount = useMemo(() =>
-    tasks.filter(t => t.metadata?.archivedAt).length,
-    [tasks]
+    allTasks.filter(t => t.metadata?.archivedAt).length,
+    [allTasks]
   );
 
   // Calculate collapsed column count for "Expand All" button
@@ -702,13 +719,13 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     ).length;
   }, [columnPreferences]);
 
-  // Filter tasks based on archive status
+  // Filter tasks based on archive status (using merged allTasks)
   const filteredTasks = useMemo(() => {
     if (showArchived) {
-      return tasks; // Show all tasks including archived
+      return allTasks; // Show all tasks including archived
     }
-    return tasks.filter((t) => !t.metadata?.archivedAt);
-  }, [tasks, showArchived]);
+    return allTasks.filter((t) => !t.metadata?.archivedAt);
+  }, [allTasks, showArchived]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -858,7 +875,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const task = tasks.find((t) => t.id === active.id);
+    const task = allTasks.find((t) => t.id === active.id);
     if (task) {
       setActiveTask(task);
     }
@@ -881,7 +898,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     }
 
     // Check if over a task - get its column
-    const overTask = tasks.find((t) => t.id === overId);
+    const overTask = allTasks.find((t) => t.id === overId);
     if (overTask) {
       setOverColumnId(overTask.status);
     }
@@ -1365,7 +1382,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     let oldStatus: TaskStatus | null = null;
 
     // Get the task being dragged
-    const task = tasks.find((t) => t.id === activeTaskId);
+    const task = allTasks.find((t) => t.id === activeTaskId);
     if (!task) return;
     oldStatus = task.status;
 
@@ -1374,9 +1391,9 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
       newStatus = overId;
     } else {
       // Check if dropped on another task - move to that task's column
-      const overTask = tasks.find((t) => t.id === overId);
+      const overTask = allTasks.find((t) => t.id === overId);
       if (overTask) {
-        const task = tasks.find((t) => t.id === activeTaskId);
+        const task = allTasks.find((t) => t.id === activeTaskId);
         if (!task) return;
 
         // Compare visual columns
