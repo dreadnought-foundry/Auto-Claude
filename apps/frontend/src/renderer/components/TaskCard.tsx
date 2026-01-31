@@ -29,7 +29,9 @@ import {
   TASK_STATUS_COLUMNS,
   TASK_STATUS_LABELS,
   JSON_ERROR_PREFIX,
-  JSON_ERROR_TITLE_SUFFIX
+  JSON_ERROR_TITLE_SUFFIX,
+  PIPELINE_TYPE_ICONS,
+  MAESTRO_PHASE_LABELS
 } from '../../shared/constants';
 import { startTask, stopTask, checkTaskRunning, recoverStuckTask, isIncompleteHumanReview, archiveTasks } from '../stores/task-store';
 import type { Task, TaskCategory, ReviewReason, TaskStatus } from '../../shared/types';
@@ -105,6 +107,9 @@ function taskCardPropsAreEqual(prevProps: TaskCardProps, nextProps: TaskCardProp
     prevTask.metadata?.complexity === nextTask.metadata?.complexity &&
     prevTask.metadata?.archivedAt === nextTask.metadata?.archivedAt &&
     prevTask.metadata?.prUrl === nextTask.metadata?.prUrl &&
+    prevTask.metadata?.pipelineType === nextTask.metadata?.pipelineType &&
+    prevTask.metadata?.maestroPhase === nextTask.metadata?.maestroPhase &&
+    prevTask.metadata?.maestroStep === nextTask.metadata?.maestroStep &&
     // Check if any subtask statuses changed (compare all subtasks)
     prevTask.subtasks.every((s, i) => s.status === nextTask.subtasks[i]?.status)
   );
@@ -430,6 +435,26 @@ export const TaskCard = memo(function TaskCard({
               >
                 <Archive className="h-2.5 w-2.5" />
                 {t('status.archived')}
+              </Badge>
+            )}
+            {/* Pipeline type indicator - show 🤖 or 🎯 */}
+            {task.metadata?.pipelineType && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  'text-[10px] px-1.5 py-0.5 flex items-center gap-1',
+                  task.metadata.pipelineType === 'maestro'
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/30'
+                    : 'bg-info/10 text-info border-info/30'
+                )}
+              >
+                <span className="text-xs">{PIPELINE_TYPE_ICONS[task.metadata.pipelineType]}</span>
+                {task.metadata.pipelineType === 'maestro' && task.metadata.maestroPhase && (
+                  <span className="ml-0.5">
+                    {MAESTRO_PHASE_LABELS[task.metadata.maestroPhase] || `Phase ${task.metadata.maestroPhase}`}
+                    {task.metadata.maestroStep && ` • ${task.metadata.maestroStep}`}
+                  </span>
+                )}
               </Badge>
             )}
             {/* Execution phase badge - shown when actively running */}
