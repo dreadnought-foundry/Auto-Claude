@@ -1,10 +1,12 @@
 ---
 epic: 1
 title: "Maestro Integration"
-status: planning
+status: done
 created: 2026-01-29
 started: null
-completed: null
+completed: 2026-01-30T16:32:35Z
+
+total_hours: 15.1
 ---
 
 # Epic 1: Maestro Integration
