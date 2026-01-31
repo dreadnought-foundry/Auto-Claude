@@ -10,6 +10,13 @@ import { IPC_CHANNELS } from '../../../shared/constants/ipc';
 import type { IPCResult } from '../../../shared/types/common';
 import type { UnifiedTaskState } from '../../../shared/types/task';
 
+export interface OpenMaestroTerminalOptions {
+  /** Sprint file path for context (optional) */
+  sprintFile?: string;
+  /** Whether to invoke Claude in the terminal (default: true) */
+  invokeClaude?: boolean;
+}
+
 export interface MaestroAPI {
   /** Get current unified state for a project */
   getMaestroState: (projectId: string) => Promise<IPCResult<UnifiedTaskState | null>>;
@@ -21,6 +28,11 @@ export interface MaestroAPI {
   onMaestroStateUpdate: (
     callback: (event: IpcRendererEvent, data: { projectId: string; state: UnifiedTaskState }) => void
   ) => () => void;
+  /** Open a terminal for Maestro sprint work */
+  openMaestroTerminal: (
+    projectId: string,
+    options?: OpenMaestroTerminalOptions
+  ) => Promise<IPCResult<{ terminalId: string }>>;
 }
 
 export function createMaestroAPI(): MaestroAPI {
@@ -40,5 +52,8 @@ export function createMaestroAPI(): MaestroAPI {
         ipcRenderer.removeListener(IPC_CHANNELS.MAESTRO_STATE_UPDATE, callback);
       };
     },
+
+    openMaestroTerminal: (projectId: string, options?: OpenMaestroTerminalOptions) =>
+      ipcRenderer.invoke(IPC_CHANNELS.MAESTRO_OPEN_TERMINAL, projectId, options),
   };
 }

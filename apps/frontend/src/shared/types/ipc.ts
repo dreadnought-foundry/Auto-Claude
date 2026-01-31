@@ -882,6 +882,10 @@ export interface ElectronAPI {
   onMaestroStateUpdate: (
     callback: (event: unknown, data: { projectId: string; state: import('./task').UnifiedTaskState }) => void
   ) => () => void;
+  openMaestroTerminal: (
+    projectId: string,
+    options?: { sprintFile?: string; invokeClaude?: boolean }
+  ) => Promise<IPCResult<{ terminalId: string }>>;
 
   // Queue Routing API (rate limit recovery)
   queue: import('../../preload/api/queue-api').QueueAPI;

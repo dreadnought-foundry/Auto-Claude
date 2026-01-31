@@ -10,6 +10,8 @@ import { ipcMain, BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
 import type { IPCResult } from '../../shared/types';
 import { projectStore } from '../project-store';
+import { TerminalManager } from '../terminal-manager';
+import { readSettingsFileAsync } from '../settings-utils';
 import {
   readUnifiedState,
   watchUnifiedState,
@@ -27,6 +29,7 @@ const activeWatcherCleanups = new Map<string, () => void>();
  * Register Maestro state IPC handlers
  */
 export function registerMaestroHandlers(
+  terminalManager: TerminalManager,
   getMainWindow: () => BrowserWindow | null
 ): void {
   /**
@@ -122,6 +125,66 @@ export function registerMaestroHandlers(
       }
 
       return { success: true, data: undefined };
+    }
+  );
+
+  /**
+   * Open a terminal for Maestro sprint work
+   * Creates or reuses a terminal in the project directory with Claude invoked
+   */
+  ipcMain.handle(
+    IPC_CHANNELS.MAESTRO_OPEN_TERMINAL,
+    async (
+      _,
+      projectId: string,
+      options?: { sprintFile?: string; invokeClause?: boolean }
+    ): Promise<IPCResult<{ terminalId: string }>> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) {
+        return { success: false, error: 'Project not found' };
+      }
+
+      try {
+        // Generate a unique terminal ID for Maestro work
+        const terminalId = `maestro-${projectId}-${Date.now()}`;
+
+        // Create a new terminal in the project directory
+        const createResult = await terminalManager.create({
+          id: terminalId,
+          cwd: project.path,
+          projectPath: project.path,
+        });
+
+        if (!createResult.success) {
+          return { success: false, error: createResult.error || 'Failed to create terminal' };
+        }
+
+        // If requested, invoke Claude in the terminal
+        if (options?.invokeClause !== false) {
+          // Read settings to check for YOLO mode
+          const settings = await readSettingsFileAsync();
+          const dangerouslySkipPermissions = settings?.dangerouslySkipPermissions === true;
+
+          // Small delay to let the terminal initialize before invoking Claude
+          setTimeout(async () => {
+            await terminalManager.invokeClaudeAsync(
+              terminalId,
+              project.path,
+              undefined,
+              dangerouslySkipPermissions
+            );
+          }, 500);
+        }
+
+        console.log(`[maestro-handlers] Opened terminal for Maestro work: ${terminalId}`);
+        return { success: true, data: { terminalId } };
+      } catch (err) {
+        console.error('[maestro-handlers] Error opening terminal for Maestro:', err);
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Failed to open terminal',
+        };
+      }
     }
   );
 

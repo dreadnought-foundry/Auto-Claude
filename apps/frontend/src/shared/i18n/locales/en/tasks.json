@@ -21,7 +21,8 @@
     "viewPR": "View PR",
     "moveTo": "Move to",
     "taskActions": "Task actions",
-    "selectTask": "Select task: {{title}}"
+    "selectTask": "Select task: {{title}}",
+    "openTerminal": "Open Terminal"
   },
   "labels": {
     "running": "Running",

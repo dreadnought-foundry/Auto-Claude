@@ -373,6 +373,10 @@ const browserMockAPI: ElectronAPI = {
     // No-op in browser mode
     return () => {};
   },
+  openMaestroTerminal: async (_projectId: string, _options?: { sprintFile?: string; invokeClaude?: boolean }) => ({
+    success: false as const,
+    error: 'Not available in browser mode'
+  }),
 
   // Debug Operations
   getDebugInfo: async () => ({

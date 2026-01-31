@@ -579,5 +579,8 @@ export const IPC_CHANNELS = {
   MAESTRO_STATE_UNWATCH: 'maestro:stateUnwatch',      // Stop watching state file
 
   // Maestro state events (main -> renderer)
-  MAESTRO_STATE_UPDATE: 'maestro:stateUpdate'         // State file changed (debounced)
+  MAESTRO_STATE_UPDATE: 'maestro:stateUpdate',        // State file changed (debounced)
+
+  // Maestro execution operations
+  MAESTRO_OPEN_TERMINAL: 'maestro:openTerminal'       // Open terminal for Maestro sprint work
 } as const;

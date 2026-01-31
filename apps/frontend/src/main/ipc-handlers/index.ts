@@ -128,7 +128,7 @@ export function setupIpcHandlers(
   registerEpicHandlers();
 
   // Maestro state handlers (unified state for Maestro pipeline integration)
-  registerMaestroHandlers(getMainWindow);
+  registerMaestroHandlers(terminalManager, getMainWindow);
 
   console.warn('[IPC] All handler modules registered successfully');
 }

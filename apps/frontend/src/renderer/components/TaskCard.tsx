@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, Square, Clock, Zap, Target, Shield, Gauge, Palette, FileCode, Bug, Wrench, Loader2, AlertTriangle, RotateCcw, Archive, GitPullRequest, MoreVertical } from 'lucide-react';
+import { Play, Square, Clock, Zap, Target, Shield, Gauge, Palette, FileCode, Bug, Wrench, Loader2, AlertTriangle, RotateCcw, Archive, GitPullRequest, MoreVertical, Terminal } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -312,6 +312,22 @@ export const TaskCard = memo(function TaskCard({
       window.electronAPI.openExternal(task.metadata.prUrl);
     }
   };
+
+  const handleOpenMaestroTerminal = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.electronAPI?.openMaestroTerminal) {
+      const result = await window.electronAPI.openMaestroTerminal(task.projectId, {
+        sprintFile: task.metadata?.sprintFile,
+        invokeClaude: true
+      });
+      if (!result.success) {
+        console.error('[TaskCard] Failed to open Maestro terminal:', result.error);
+      }
+    }
+  };
+
+  // Check if this is a Maestro pipeline task
+  const isMaestroTask = task.metadata?.pipelineType === 'maestro';
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -640,6 +656,16 @@ export const TaskCard = memo(function TaskCard({
               >
                 <Archive className="mr-1.5 h-3 w-3" />
                 {t('actions.archive')}
+              </Button>
+            ) : isMaestroTask ? (
+              <Button
+                variant="default"
+                size="sm"
+                className="h-7 px-2.5"
+                onClick={handleOpenMaestroTerminal}
+              >
+                <Terminal className="mr-1.5 h-3 w-3" />
+                {t('actions.openTerminal', 'Open Terminal')}
               </Button>
             ) : (task.status === 'backlog' || task.status === 'in_progress') && (
               <Button
