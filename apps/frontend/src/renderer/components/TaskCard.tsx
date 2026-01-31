@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, Square, Clock, Zap, Target, Shield, Gauge, Palette, FileCode, Bug, Wrench, Loader2, AlertTriangle, RotateCcw, Archive, GitPullRequest, MoreVertical, Terminal } from 'lucide-react';
+import { Play, Square, Clock, Zap, Target, Shield, Gauge, Palette, FileCode, Bug, Wrench, Loader2, AlertTriangle, RotateCcw, Archive, GitPullRequest, MoreVertical, Terminal, Bot, WandSparkles } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -30,7 +30,6 @@ import {
   TASK_STATUS_LABELS,
   JSON_ERROR_PREFIX,
   JSON_ERROR_TITLE_SUFFIX,
-  PIPELINE_TYPE_ICONS,
   MAESTRO_PHASE_LABELS
 } from '../../shared/constants';
 import { startTask, stopTask, checkTaskRunning, recoverStuckTask, isIncompleteHumanReview, archiveTasks } from '../stores/task-store';
@@ -453,7 +452,7 @@ export const TaskCard = memo(function TaskCard({
                 {t('status.archived')}
               </Badge>
             )}
-            {/* Pipeline type indicator - show 🤖 or 🎯 */}
+            {/* Pipeline type indicator - show Bot or WandSparkles icon */}
             {task.metadata?.pipelineType && (
               <Badge
                 variant="outline"
@@ -464,7 +463,11 @@ export const TaskCard = memo(function TaskCard({
                     : 'bg-info/10 text-info border-info/30'
                 )}
               >
-                <span className="text-xs">{PIPELINE_TYPE_ICONS[task.metadata.pipelineType]}</span>
+                {task.metadata.pipelineType === 'maestro' ? (
+                  <WandSparkles className="h-3 w-3" />
+                ) : (
+                  <Bot className="h-3 w-3" />
+                )}
                 {task.metadata.pipelineType === 'maestro' && task.metadata.maestroPhase && (
                   <span className="ml-0.5">
                     {MAESTRO_PHASE_LABELS[task.metadata.maestroPhase] || `Phase ${task.metadata.maestroPhase}`}

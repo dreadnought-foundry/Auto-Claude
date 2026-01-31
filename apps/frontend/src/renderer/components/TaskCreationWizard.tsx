@@ -12,7 +12,7 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2, ChevronDown, ChevronUp, RotateCcw, FolderTree, GitBranch, Info, Layers } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, RotateCcw, FolderTree, GitBranch, Info, Layers, Bot, WandSparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Combobox, type ComboboxOption } from './ui/combobox';
@@ -32,7 +32,6 @@ import {
   DEFAULT_PHASE_THINKING
 } from '../../shared/constants';
 import {
-  PIPELINE_TYPE_ICONS,
   type PipelineType
 } from '../../shared/constants/task';
 import { useSettingsStore } from '../stores/settings-store';
@@ -679,7 +678,7 @@ export function TaskCreationWizard({
               )}
             >
               <div className="flex items-center gap-2">
-                <span className="text-xl">{PIPELINE_TYPE_ICONS.autonomous}</span>
+                <Bot className="h-5 w-5" />
                 <span className="font-medium">{t('tasks:pipelines.autonomous')}</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -700,7 +699,7 @@ export function TaskCreationWizard({
               )}
             >
               <div className="flex items-center gap-2">
-                <span className="text-xl">{PIPELINE_TYPE_ICONS.maestro}</span>
+                <WandSparkles className="h-5 w-5" />
                 <span className="font-medium">{t('tasks:pipelines.maestro')}</span>
               </div>
               <p className="text-xs text-muted-foreground">

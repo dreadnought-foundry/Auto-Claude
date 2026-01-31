@@ -239,9 +239,16 @@ export const PIPELINE_TYPE_DESCRIPTIONS: Record<PipelineType, string> = {
   maestro: 'pipelines.maestroDesc'
 };
 
+// Emoji icons for simple display contexts
 export const PIPELINE_TYPE_ICONS: Record<PipelineType, string> = {
   autonomous: '🤖',
-  maestro: '🎯'
+  maestro: '🪄'  // Conductor's baton
+};
+
+// Lucide icon names for component-based rendering
+export const PIPELINE_TYPE_LUCIDE_ICONS: Record<PipelineType, string> = {
+  autonomous: 'Bot',
+  maestro: 'WandSparkles'  // Conductor's baton with sparkles
 };
 
 // Maestro phase to Kanban column mapping
