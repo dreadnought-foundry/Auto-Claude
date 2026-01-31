@@ -133,7 +133,9 @@
     "taskNotFoundForWorktree": "Tâche introuvable pour le worktree : {{specName}}",
     "failedToDeleteTaskWorktree": "Échec de la suppression du worktree de tâche : {{specName}}",
     "terminalWorktreeNotFound": "Worktree terminal introuvable : {{name}}",
-    "failedToDeleteTerminalWorktree": "Échec de la suppression du worktree terminal : {{name}}"
+    "failedToDeleteTerminalWorktree": "Échec de la suppression du worktree terminal : {{name}}",
+    "qualityGatesFailed": "Contrôles qualité échoués",
+    "checksFailed": "Certaines vérifications ont échoué"
   },
   "notification": {
     "accountSwitched": "Compte changé",

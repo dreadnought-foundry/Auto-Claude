@@ -907,9 +907,34 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   /**
    * Handle status change with worktree cleanup dialog support
    * Consolidated handler that accepts an optional task object for the dialog title
+   * Also handles Maestro quality gate checks when moving to "done"
    */
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus, providedTask?: Task) => {
-    const task = providedTask || tasks.find(t => t.id === taskId);
+    const task = providedTask || allTasks.find(t => t.id === taskId);
+
+    // Check quality gates for Maestro tasks moving to done
+    if (newStatus === 'done' && task?.metadata?.pipelineType === 'maestro' && projectId) {
+      try {
+        const gateResult = await window.electronAPI.checkMaestroQualityGates(projectId, taskId);
+        if (gateResult.success && gateResult.data && !gateResult.data.passed) {
+          // Quality gates failed - show error and block completion
+          const failedChecks = gateResult.data.checks
+            .filter(c => !c.passed)
+            .map(c => c.name)
+            .join(', ');
+          toast({
+            title: t('common:errors.qualityGatesFailed', 'Quality Gates Failed'),
+            description: `${gateResult.data.failureReason || t('common:errors.checksFailed', 'Some checks failed')}: ${failedChecks}`,
+            variant: 'destructive'
+          });
+          return; // Block the status change
+        }
+      } catch (err) {
+        console.error('[KanbanBoard] Error checking quality gates:', err);
+        // Allow completion if quality gate check fails unexpectedly
+      }
+    }
+
     const result = await persistTaskStatus(taskId, newStatus);
 
     if (!result.success) {

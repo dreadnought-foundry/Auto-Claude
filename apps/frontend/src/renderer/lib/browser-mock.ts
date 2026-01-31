@@ -377,6 +377,19 @@ const browserMockAPI: ElectronAPI = {
     success: false as const,
     error: 'Not available in browser mode'
   }),
+  checkMaestroQualityGates: async (_projectId: string, _taskId: string) => ({
+    success: true,
+    data: {
+      passed: true,
+      sprintType: 'basic',
+      coverageThreshold: 60,
+      checks: [
+        { name: 'All phases completed', passed: true, message: 'Mock check passed' },
+        { name: 'Sprint file exists', passed: true, message: 'Mock check passed' },
+        { name: 'Task status valid', passed: true, message: 'Mock check passed' }
+      ]
+    }
+  }),
 
   // Debug Operations
   getDebugInfo: async () => ({

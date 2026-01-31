@@ -886,6 +886,10 @@ export interface ElectronAPI {
     projectId: string,
     options?: { sprintFile?: string; invokeClaude?: boolean }
   ) => Promise<IPCResult<{ terminalId: string }>>;
+  checkMaestroQualityGates: (
+    projectId: string,
+    taskId: string
+  ) => Promise<IPCResult<import('./task').MaestroQualityGateResult>>;
 
   // Queue Routing API (rate limit recovery)
   queue: import('../../preload/api/queue-api').QueueAPI;

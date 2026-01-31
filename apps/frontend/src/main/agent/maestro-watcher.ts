@@ -50,6 +50,61 @@ export async function readUnifiedState(projectPath: string): Promise<UnifiedTask
 }
 
 /**
+ * Write the unified state file
+ */
+export async function writeUnifiedState(
+  projectPath: string,
+  state: UnifiedTaskState
+): Promise<void> {
+  const stateDir = path.join(projectPath, '.claude');
+  const statePath = path.join(stateDir, 'task-state.json');
+
+  // Ensure directory exists
+  if (!fs.existsSync(stateDir)) {
+    fs.mkdirSync(stateDir, { recursive: true });
+  }
+
+  // Update lastUpdated timestamp
+  state.lastUpdated = new Date().toISOString();
+
+  await fs.promises.writeFile(statePath, JSON.stringify(state, null, 2), 'utf-8');
+  console.log(`[MaestroWatcher] Wrote unified state with ${state.tasks.length} tasks`);
+}
+
+/**
+ * Add a task to the unified state
+ * Creates the state file if it doesn't exist
+ */
+export async function addTaskToUnifiedState(
+  projectPath: string,
+  task: UnifiedTask
+): Promise<void> {
+  let state = await readUnifiedState(projectPath);
+
+  if (!state) {
+    // Initialize new state file
+    state = {
+      version: '1.0',
+      projectRoot: projectPath,
+      tasks: [],
+      lastUpdated: new Date().toISOString(),
+    };
+  }
+
+  // Check if task already exists
+  const existingIndex = state.tasks.findIndex(t => t.id === task.id);
+  if (existingIndex >= 0) {
+    // Update existing task
+    state.tasks[existingIndex] = task;
+  } else {
+    // Add new task
+    state.tasks.push(task);
+  }
+
+  await writeUnifiedState(projectPath, state);
+}
+
+/**
  * Get Maestro tasks from unified state
  */
 export function getMaestroTasks(state: UnifiedTaskState): UnifiedTask[] {
@@ -81,7 +136,7 @@ export function watchUnifiedState(
   console.log(`[MaestroWatcher] Starting watch on ${statePath}`);
 
   try {
-    const watcher = fs.watch(stateDir, { persistent: true }, (eventType, filename) => {
+    const watcher = fs.watch(stateDir, { persistent: true }, (_eventType, filename) => {
       // Only react to changes to task-state.json
       if (filename !== 'task-state.json') {
         return;

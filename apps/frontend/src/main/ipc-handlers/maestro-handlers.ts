@@ -7,8 +7,10 @@
  */
 
 import { ipcMain, BrowserWindow } from 'electron';
+import { existsSync } from 'node:fs';
+import * as path from 'node:path';
 import { IPC_CHANNELS } from '../../shared/constants';
-import type { IPCResult } from '../../shared/types';
+import type { IPCResult, MaestroQualityGateResult } from '../../shared/types';
 import { projectStore } from '../project-store';
 import { TerminalManager } from '../terminal-manager';
 import { readSettingsFileAsync } from '../settings-utils';
@@ -183,6 +185,99 @@ export function registerMaestroHandlers(
         return {
           success: false,
           error: err instanceof Error ? err.message : 'Failed to open terminal',
+        };
+      }
+    }
+  );
+
+  /**
+   * Check quality gates for a Maestro task before completion
+   * Returns pass/fail status with details about which checks passed/failed
+   */
+  ipcMain.handle(
+    IPC_CHANNELS.MAESTRO_CHECK_QUALITY_GATES,
+    async (
+      _,
+      projectId: string,
+      taskId: string
+    ): Promise<IPCResult<MaestroQualityGateResult>> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) {
+        return { success: false, error: 'Project not found' };
+      }
+
+      try {
+        // Get task from unified state
+        const state = await readUnifiedState(project.path);
+        if (!state) {
+          return { success: false, error: 'Unified state not found' };
+        }
+
+        const task = state.tasks.find(t => t.id === taskId);
+        if (!task) {
+          return { success: false, error: 'Task not found in unified state' };
+        }
+
+        // Get sprint type and coverage threshold
+        const sprintType = task.sprintType || 'basic';
+        const coverageThresholds: Record<string, number> = {
+          'basic': 60,
+          'fullstack': 75,
+          'infrastructure': 70,
+          'documentation': 50,
+          'refactoring': 80,
+        };
+        const coverageThreshold = coverageThresholds[sprintType] || 60;
+
+        // Run quality gate checks
+        const checks: MaestroQualityGateResult['checks'] = [];
+
+        // Check 1: All phases completed
+        const completedSteps = task.completedSteps || [];
+        const phase6Steps = ['6.1', '6.2', '6.3', '6.4'];
+        const allPhasesComplete = phase6Steps.every(step => completedSteps.includes(step));
+        checks.push({
+          name: 'All phases completed',
+          passed: allPhasesComplete,
+          message: allPhasesComplete ? 'All completion steps verified' : 'Missing completion steps: ' + phase6Steps.filter(s => !completedSteps.includes(s)).join(', ')
+        });
+
+        // Check 2: Sprint file exists
+        const sprintFileExists = task.sprintFile ? existsSync(path.join(project.path, task.sprintFile)) : false;
+        checks.push({
+          name: 'Sprint file exists',
+          passed: sprintFileExists,
+          message: sprintFileExists ? `Sprint file: ${task.sprintFile}` : 'Sprint file not found'
+        });
+
+        // Check 3: Task status is appropriate for completion
+        const statusOk = task.status === 'in_progress' || task.status === 'completed';
+        checks.push({
+          name: 'Task status valid',
+          passed: statusOk,
+          message: statusOk ? `Status: ${task.status}` : `Invalid status for completion: ${task.status}`
+        });
+
+        // Determine overall pass/fail
+        // For now, we require all completion steps to be done
+        // In the future, this could call the Python maestro_adapter for full validation
+        const passed = checks.every(c => c.passed);
+
+        const result: MaestroQualityGateResult = {
+          passed,
+          sprintType,
+          coverageThreshold,
+          checks,
+          failureReason: passed ? undefined : 'One or more quality checks failed'
+        };
+
+        console.log(`[maestro-handlers] Quality gate check for ${taskId}: ${passed ? 'PASSED' : 'FAILED'}`);
+        return { success: true, data: result };
+      } catch (err) {
+        console.error('[maestro-handlers] Error checking quality gates:', err);
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Failed to check quality gates',
         };
       }
     }

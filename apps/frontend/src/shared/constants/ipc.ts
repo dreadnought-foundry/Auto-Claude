@@ -582,5 +582,6 @@ export const IPC_CHANNELS = {
   MAESTRO_STATE_UPDATE: 'maestro:stateUpdate',        // State file changed (debounced)
 
   // Maestro execution operations
-  MAESTRO_OPEN_TERMINAL: 'maestro:openTerminal'       // Open terminal for Maestro sprint work
+  MAESTRO_OPEN_TERMINAL: 'maestro:openTerminal',      // Open terminal for Maestro sprint work
+  MAESTRO_CHECK_QUALITY_GATES: 'maestro:checkQualityGates' // Check quality gates before completion
 } as const;

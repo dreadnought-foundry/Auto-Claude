@@ -1,6 +1,6 @@
 import { ipcMain, nativeImage } from 'electron';
 import { IPC_CHANNELS, AUTO_BUILD_PATHS, getSpecsDir } from '../../../shared/constants';
-import type { IPCResult, Task, TaskMetadata } from '../../../shared/types';
+import type { IPCResult, Task, TaskMetadata, UnifiedTask } from '../../../shared/types';
 import path from 'path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, Dirent } from 'fs';
 import { projectStore } from '../../project-store';
@@ -9,6 +9,7 @@ import { AgentManager } from '../../agent';
 import { findTaskAndProject } from './shared';
 import { findAllSpecPaths, isValidTaskId } from '../../utils/spec-path-helpers';
 import { isPathWithinBase } from '../../worktree-paths';
+import { addTaskToUnifiedState } from '../../agent/maestro-watcher';
 
 /**
  * Register task CRUD (Create, Read, Update, Delete) handlers
@@ -206,6 +207,140 @@ export function registerTaskCRUDHandlers(agentManager: AgentManager): void {
         createdAt: new Date(),
         updatedAt: new Date()
       };
+
+      // Initialize Maestro pipeline if selected
+      if (taskMetadata.pipelineType === 'maestro') {
+        try {
+          // Create sprint file in docs/sprints/
+          const sprintDir = path.join(project.path, 'docs', 'sprints');
+          mkdirSync(sprintDir, { recursive: true });
+
+          // Create slug from title
+          const sprintSlug = finalTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .substring(0, 50);
+
+          const sprintFilename = `sprint-${String(specNumber).padStart(2, '0')}_${sprintSlug}.md`;
+          const sprintFilePath = path.join(sprintDir, sprintFilename);
+          const today = new Date().toISOString().split('T')[0];
+
+          // Create sprint file content
+          const sprintContent = `# Sprint ${specNumber}: ${finalTitle}
+
+## Overview
+
+| Field | Value |
+|-------|-------|
+| Sprint | ${specNumber} |
+| Title | ${finalTitle} |
+| Epic | None |
+| Status | Planning |
+| Created | ${today} |
+| Started | - |
+| Completed | - |
+
+## Goal
+
+${description.split('\n')[0]}
+
+## Background
+
+${description}
+
+## Requirements
+
+### Functional Requirements
+
+- [ ] To be defined during planning
+
+### Non-Functional Requirements
+
+- [ ] To be defined during planning
+
+## Dependencies
+
+- **Sprints**: None
+- **External**: None
+
+## Scope
+
+### In Scope
+
+- ${finalTitle}
+
+### Out of Scope
+
+- To be defined
+
+## Technical Approach
+
+To be defined during planning phase.
+
+## Tasks
+
+### Phase 1: Planning
+- [ ] Review requirements
+- [ ] Design architecture
+- [ ] Clarify requirements
+
+### Phase 2: Implementation
+- [ ] Write tests
+- [ ] Implement feature
+- [ ] Fix test failures
+
+### Phase 3: Validation
+- [ ] Quality review
+- [ ] Refactoring
+- [ ] Re-test
+
+### Phase 4: Documentation
+- [ ] Update relevant docs
+
+## Acceptance Criteria
+
+- [ ] All requirements met
+- [ ] All tests passing
+- [ ] Code reviewed
+
+## Notes
+
+Created via Auto Claude Kanban - Maestro pipeline
+Task ID: ${specId}
+`;
+
+          writeFileSync(sprintFilePath, sprintContent, 'utf-8');
+          console.log(`[TASK_CREATE] Created Maestro sprint file: ${sprintFilePath}`);
+
+          // Update task metadata with sprint file reference
+          taskMetadata.sprintFile = `docs/sprints/${sprintFilename}`;
+          const metadataPath = path.join(specDir, 'task_metadata.json');
+          writeFileSync(metadataPath, JSON.stringify(taskMetadata, null, 2), 'utf-8');
+          task.metadata = taskMetadata;
+
+          // Add task to unified state
+          const unifiedTask: UnifiedTask = {
+            id: specId,
+            title: finalTitle,
+            pipeline: 'maestro',
+            status: 'pending',
+            phase: '1',
+            step: '1.1',
+            completedSteps: [],
+            sprintFile: `docs/sprints/${sprintFilename}`,
+            specDir: specId,
+            created: new Date().toISOString(),
+          };
+
+          await addTaskToUnifiedState(project.path, unifiedTask);
+          console.log(`[TASK_CREATE] Added Maestro task to unified state: ${specId}`);
+
+        } catch (maestroErr) {
+          console.error('[TASK_CREATE] Error initializing Maestro pipeline:', maestroErr);
+          // Continue without failing - task is still created
+        }
+      }
 
       // Invalidate cache since a new task was created
       projectStore.invalidateTasksCache(projectId);

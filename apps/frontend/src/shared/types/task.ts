@@ -550,3 +550,19 @@ export interface UnifiedTask {
   currentSubtask?: string;
   error?: string;
 }
+
+/**
+ * Result of a Maestro quality gate check
+ */
+export interface MaestroQualityGateResult {
+  passed: boolean;
+  sprintType: string;
+  coverageThreshold: number;
+  actualCoverage?: number;
+  failureReason?: string;
+  checks: Array<{
+    name: string;
+    passed: boolean;
+    message?: string;
+  }>;
+}
