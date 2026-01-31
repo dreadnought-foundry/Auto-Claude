@@ -59,7 +59,7 @@ export function setupIpcHandlers(
   registerProjectHandlers(pythonEnvManager, agentManager, getMainWindow);
 
   // Task handlers
-  registerTaskHandlers(agentManager, pythonEnvManager, getMainWindow);
+  registerTaskHandlers(agentManager, pythonEnvManager, terminalManager, getMainWindow);
 
   // Terminal and Claude profile handlers
   registerTerminalHandlers(terminalManager, getMainWindow);

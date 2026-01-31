@@ -133,13 +133,18 @@ export function registerMaestroHandlers(
   /**
    * Open a terminal for Maestro sprint work
    * Creates or reuses a terminal in the project directory with Claude invoked
+   *
+   * Options:
+   * - sprintFile: Path to the sprint file (for reference)
+   * - invokeClaude: Whether to invoke Claude Code (default: true)
+   * - autoStartSprint: Sprint number to auto-start (sends /sprint-start N after Claude loads)
    */
   ipcMain.handle(
     IPC_CHANNELS.MAESTRO_OPEN_TERMINAL,
     async (
       _,
       projectId: string,
-      options?: { sprintFile?: string; invokeClause?: boolean }
+      options?: { sprintFile?: string; invokeClaude?: boolean; autoStartSprint?: number }
     ): Promise<IPCResult<{ terminalId: string }>> => {
       const project = projectStore.getProject(projectId);
       if (!project) {
@@ -162,7 +167,7 @@ export function registerMaestroHandlers(
         }
 
         // If requested, invoke Claude in the terminal
-        if (options?.invokeClause !== false) {
+        if (options?.invokeClaude !== false) {
           // Read settings to check for YOLO mode
           const settings = await readSettingsFileAsync();
           const dangerouslySkipPermissions = settings?.dangerouslySkipPermissions === true;
@@ -175,10 +180,20 @@ export function registerMaestroHandlers(
               undefined,
               dangerouslySkipPermissions
             );
+
+            // If autoStartSprint is specified, send the /sprint-start command after Claude loads
+            if (options?.autoStartSprint !== undefined) {
+              // Wait for Claude to fully initialize (Claude Code takes a moment to start)
+              setTimeout(() => {
+                const sprintCommand = `/sprint-start ${options.autoStartSprint}\n`;
+                console.log(`[maestro-handlers] Auto-starting sprint ${options.autoStartSprint} in terminal ${terminalId}`);
+                terminalManager.write(terminalId, sprintCommand);
+              }, 3000); // 3 second delay for Claude to initialize
+            }
           }, 500);
         }
 
-        console.log(`[maestro-handlers] Opened terminal for Maestro work: ${terminalId}`);
+        console.log(`[maestro-handlers] Opened terminal for Maestro work: ${terminalId}${options?.autoStartSprint ? ` (auto-start sprint ${options.autoStartSprint})` : ''}`);
         return { success: true, data: { terminalId } };
       } catch (err) {
         console.error('[maestro-handlers] Error opening terminal for Maestro:', err);

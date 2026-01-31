@@ -1,6 +1,6 @@
 {
   "counters": {
-    "next_sprint": 7,
+    "next_sprint": 8,
     "next_epic": 1
   },
   "sprints": {
@@ -63,6 +63,16 @@
       "started": null,
       "completed": "2026-01-31",
       "hours": 9.4
+    },
+    "7": {
+      "title": "Maestro Auto-Start Terminal Integration",
+      "status": "planning",
+      "epic": null,
+      "type": "fullstack",
+      "created": "2026-01-31",
+      "started": null,
+      "completed": null,
+      "hours": null
     }
   },
   "epics": {
@@ -88,5 +98,5 @@
     }
   },
   "nextEpicNumber": 3,
-  "nextSprintNumber": 7
+  "nextSprintNumber": 8
 }

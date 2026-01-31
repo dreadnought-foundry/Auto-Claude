@@ -18,6 +18,8 @@ import {
 import { findTaskWorktree } from '../../worktree-paths';
 import { projectStore } from '../../project-store';
 import { getIsolatedGitEnv, detectWorktreeBranch } from '../../utils/git-isolation';
+import { TerminalManager } from '../../terminal-manager';
+import { readSettingsFileAsync } from '../../settings-utils';
 
 /**
  * Atomic file write to prevent TOCTOU race conditions.
@@ -76,6 +78,30 @@ function checkSubtasksCompletion(plan: Record<string, unknown> | null): {
 }
 
 /**
+ * Extract sprint number from sprintFile path.
+ * Handles formats like:
+ * - "docs/sprints/sprint-04_title.md" -> 4
+ * - "docs/sprints/2-in-progress/sprint-07_feature/sprint-07_feature.md" -> 7
+ * - "sprint-01_something.md" -> 1
+ *
+ * @param sprintFile - Path to sprint file
+ * @returns Sprint number, or null if pattern not found
+ */
+function extractSprintNumber(sprintFile: string): number | null {
+  if (!sprintFile) return null;
+
+  // Get just the filename from the path
+  const filename = path.basename(sprintFile);
+
+  // Match pattern: sprint-NN_ where NN is 1-3 digits
+  const match = filename.match(/^sprint-(\d{1,3})_/);
+  if (!match) return null;
+
+  const sprintNumber = parseInt(match[1], 10);
+  return isNaN(sprintNumber) ? null : sprintNumber;
+}
+
+/**
  * Helper function to ensure profile manager is initialized.
  * Returns a discriminated union for type-safe error handling.
  *
@@ -104,6 +130,7 @@ async function ensureProfileManagerInitialized(): Promise<
  */
 export function registerTaskExecutionHandlers(
   agentManager: AgentManager,
+  terminalManager: TerminalManager,
   getMainWindow: () => BrowserWindow | null
 ): void {
   /**
@@ -143,6 +170,100 @@ export function registerTaskExecutionHandlers(
           'Task or project not found'
         );
         return;
+      }
+
+      // Handle Maestro pipeline tasks - auto-start via terminal with /sprint-start
+      if (task.metadata?.pipelineType === 'maestro') {
+        const sprintFile = task.metadata?.sprintFile as string | undefined;
+        const sprintNumber = extractSprintNumber(sprintFile || '');
+
+        if (sprintNumber === null) {
+          console.warn('[TASK_START] Cannot auto-start Maestro task - missing or invalid sprintFile:', sprintFile);
+          mainWindow.webContents.send(
+            IPC_CHANNELS.TASK_ERROR,
+            taskId,
+            'Cannot start Maestro task: Sprint file not configured or has invalid format. Expected format: sprint-NN_title.md'
+          );
+          return;
+        }
+
+        try {
+          // Generate a unique terminal ID for this task
+          const terminalId = `maestro-${taskId}-${Date.now()}`;
+
+          // Create a new terminal in the project directory
+          const createResult = await terminalManager.create({
+            id: terminalId,
+            cwd: project.path,
+            projectPath: project.path,
+          });
+
+          if (!createResult.success) {
+            console.warn('[TASK_START] Failed to create terminal for Maestro task:', createResult.error);
+            mainWindow.webContents.send(
+              IPC_CHANNELS.TASK_ERROR,
+              taskId,
+              createResult.error || 'Failed to create terminal for Maestro task'
+            );
+            return;
+          }
+
+          // Read settings to check for YOLO mode (dangerouslySkipPermissions)
+          const settings = await readSettingsFileAsync();
+          const dangerouslySkipPermissions = settings?.dangerouslySkipPermissions === true;
+
+          // Small delay to let terminal initialize before invoking Claude
+          setTimeout(async () => {
+            await terminalManager.invokeClaudeAsync(
+              terminalId,
+              project.path,
+              undefined, // Use active profile
+              dangerouslySkipPermissions
+            );
+
+            // Wait for Claude to fully initialize, then send sprint-start command
+            setTimeout(() => {
+              const sprintCommand = `/sprint-start ${sprintNumber}\n`;
+              console.log(`[TASK_START] Auto-starting sprint ${sprintNumber} for Maestro task ${taskId} in terminal ${terminalId}`);
+              terminalManager.write(terminalId, sprintCommand);
+            }, 3000); // 3 second delay for Claude to initialize
+          }, 500); // 500ms delay for terminal initialization
+
+          // Update task status to in_progress
+          mainWindow.webContents.send(
+            IPC_CHANNELS.TASK_STATUS_CHANGE,
+            taskId,
+            'in_progress'
+          );
+
+          // Get spec directory for plan status persistence
+          const specsBaseDir = getSpecsDir(project.autoBuildPath);
+          const specDir = path.join(project.path, specsBaseDir, task.specId);
+
+          // Persist status to implementation_plan.json (async, non-blocking)
+          const planPath = path.join(specDir, AUTO_BUILD_PATHS.IMPLEMENTATION_PLAN);
+          setImmediate(async () => {
+            try {
+              const persisted = await persistPlanStatus(planPath, 'in_progress', project.id);
+              if (persisted) {
+                console.warn('[TASK_START] Updated plan status to: in_progress (Maestro)');
+              }
+            } catch (err) {
+              console.error('[TASK_START] Failed to persist plan status for Maestro task:', err);
+            }
+          });
+
+          console.log(`[TASK_START] Maestro task ${taskId} started via terminal ${terminalId}`);
+        } catch (err) {
+          console.error('[TASK_START] Error starting Maestro task:', err);
+          mainWindow.webContents.send(
+            IPC_CHANNELS.TASK_ERROR,
+            taskId,
+            err instanceof Error ? err.message : 'Failed to start Maestro task'
+          );
+        }
+
+        return; // Exit early - Maestro tasks don't use agentManager
       }
 
       // Check git status - Auto Claude requires git for worktree-based builds
@@ -717,7 +838,13 @@ export function registerTaskExecutionHandlers(
         }
 
         // Auto-start task when status changes to 'in_progress' and no process is running
+        // Skip auto-start for Maestro pipeline tasks - they run via terminal with /sprint-* commands
         if (status === 'in_progress' && !agentManager.isRunning(taskId)) {
+          if (task.metadata?.pipelineType === 'maestro') {
+            console.warn('[TASK_UPDATE_STATUS] Skipping auto-start for Maestro pipeline task:', taskId, '- use Open Terminal to run');
+            return { success: true };
+          }
+
           const mainWindow = getMainWindow();
 
           // Check git status before auto-starting
