@@ -11,7 +11,7 @@ import path from 'path';
 import { IPC_CHANNELS } from '../../shared/constants';
 import type { IPCResult, EpicSummary } from '../../shared/types';
 import { projectStore } from '../project-store';
-import { getPythonExecutable } from '../python-executable';
+import { getConfiguredPythonPath } from '../python-env-manager';
 
 /**
  * Run a Python CLI command and parse JSON output
@@ -21,7 +21,7 @@ async function runPythonCommand(
   args: string[]
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   return new Promise((resolve) => {
-    const pythonPath = getPythonExecutable();
+    const pythonPath = getConfiguredPythonPath();
     const cliPath = path.join(__dirname, '../../../../backend/cli/main.py');
 
     const proc = spawn(pythonPath, [cliPath, '--project-dir', projectPath, ...args], {

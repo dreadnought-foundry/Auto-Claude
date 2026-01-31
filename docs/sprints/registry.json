@@ -1,6 +1,6 @@
 {
   "counters": {
-    "next_sprint": 5,
+    "next_sprint": 7,
     "next_epic": 1
   },
   "sprints": {
@@ -43,6 +43,26 @@
       "started": null,
       "completed": "2026-01-30",
       "hours": 23.9
+    },
+    "5": {
+      "title": "Unified State System",
+      "status": "planning",
+      "epic": 2,
+      "type": "backend",
+      "created": "2026-01-30",
+      "started": null,
+      "completed": null,
+      "hours": null
+    },
+    "6": {
+      "title": "Kanban Pipeline Integration",
+      "status": "planning",
+      "epic": 2,
+      "type": "fullstack",
+      "created": "2026-01-30",
+      "started": null,
+      "completed": null,
+      "hours": null
     }
   },
   "epics": {
@@ -55,8 +75,18 @@
       "totalSprints": 9,
       "completedSprints": 4,
       "estimatedHours": 42.0
+    },
+    "2": {
+      "title": "Unified Pipeline Architecture",
+      "status": "planning",
+      "created": "2026-01-30",
+      "started": null,
+      "completed": null,
+      "totalSprints": 2,
+      "completedSprints": 0,
+      "estimatedHours": 24.0
     }
   },
-  "nextEpicNumber": 2,
-  "nextSprintNumber": 5
+  "nextEpicNumber": 3,
+  "nextSprintNumber": 7
 }

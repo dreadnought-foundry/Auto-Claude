@@ -1,5 +1,8 @@
 .PHONY: claude dev start test test-backend test-maestro run list help
 
+# Get the directory where this Makefile lives (works from any directory)
+MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
 # Show available commands
 help:
 	@echo "Auto-Claude Make Commands:"
@@ -21,15 +24,15 @@ help:
 
 # Claude Code with skip permissions
 claude:
-	claude --dangerously-skip-permissions
+	cd "$(MAKEFILE_DIR)" && claude --dangerously-skip-permissions
 
 # Development mode (Electron + Vite HMR)
 dev:
-	cd apps/frontend && npm run dev
+	cd "$(MAKEFILE_DIR)apps/frontend" && npm run dev
 
 # Production mode
 start:
-	cd apps/frontend && npm start
+	cd "$(MAKEFILE_DIR)apps/frontend" && npm start
 
 # Run backend CLI (use: make run SPEC=001 or make run SPEC=001 ARGS='--qa')
 run:
@@ -39,20 +42,20 @@ ifndef SPEC
 	@echo "         make run SPEC=001 ARGS='--postmortem'"
 	@exit 1
 endif
-	cd apps/backend && uv run python run.py --spec $(SPEC) $(ARGS)
+	cd "$(MAKEFILE_DIR)apps/backend" && uv run python run.py --spec $(SPEC) $(ARGS)
 
 # List all specs
 list:
-	cd apps/backend && uv run python run.py --list
+	cd "$(MAKEFILE_DIR)apps/backend" && uv run python run.py --list
 
 # Run all frontend tests
 test:
-	cd apps/frontend && npm test
+	cd "$(MAKEFILE_DIR)apps/frontend" && npm test
 
 # Run backend tests
 test-backend:
-	cd apps/backend && uv run pytest tests/ -v
+	cd "$(MAKEFILE_DIR)apps/backend" && uv run pytest tests/ -v
 
 # Run Maestro integration tests
 test-maestro:
-	cd apps/backend && uv run pytest tests/test_maestro_state_bridge.py tests/test_postmortem.py tests/test_sprint_types.py -v
+	cd "$(MAKEFILE_DIR)apps/backend" && uv run pytest tests/test_maestro_state_bridge.py tests/test_postmortem.py tests/test_sprint_types.py -v
