@@ -66,13 +66,13 @@
     },
     "7": {
       "title": "Maestro Auto-Start Terminal Integration",
-      "status": "planning",
+      "status": "done",
       "epic": null,
       "type": "fullstack",
       "created": "2026-01-31",
       "started": null,
-      "completed": null,
-      "hours": null
+      "completed": "2026-01-31",
+      "hours": 8.4
     }
   },
   "epics": {

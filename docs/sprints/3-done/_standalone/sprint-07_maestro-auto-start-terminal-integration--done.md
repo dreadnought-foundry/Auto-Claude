@@ -3,12 +3,13 @@ sprint: 7
 title: "Maestro Auto-Start Terminal Integration"
 type: fullstack
 epic: null
-status: in-progress
+status: done
 created: 2026-01-31T14:00:48Z
 started: 2026-01-31T14:02:00Z
-completed: null
+completed: 2026-01-31
 hours: null
 workflow_version: "3.1.0"
+
 
 ---
 
