@@ -1950,16 +1950,24 @@ def start_sprint(sprint_num: int, dry_run: bool = False) -> dict:
     for folder in ["0-backlog", "1-todo"]:
         search_path = project_root / "docs" / "sprints" / folder
         if search_path.exists():
+            # Pattern 1: sprint-NN_title.md files
             found = list(search_path.glob(f"**/sprint-{sprint_num:02d}_*.md"))
             if found:
                 sprint_file = found[0]
+                break
+            # Pattern 2: sprint-NN_title/sprint.md folders
+            for sprint_dir in search_path.glob(f"**/sprint-{sprint_num:02d}_*"):
+                if sprint_dir.is_dir() and (sprint_dir / "sprint.md").exists():
+                    sprint_file = sprint_dir / "sprint.md"
+                    break
+            if sprint_file:
                 break
 
     # If not found in backlog/todo, check if it's an epic sprint already in progress
     if not sprint_file:
         search_path = project_root / "docs" / "sprints" / "2-in-progress"
         if search_path.exists():
-            # Look for sprint in epic folders (exclude --done files)
+            # Pattern 1: Look for sprint files in epic folders (exclude --done files)
             found = [
                 f
                 for f in search_path.glob(f"**/sprint-{sprint_num:02d}_*.md")
@@ -1968,6 +1976,14 @@ def start_sprint(sprint_num: int, dry_run: bool = False) -> dict:
             if found:
                 sprint_file = found[0]
                 already_in_progress = True
+            else:
+                # Pattern 2: sprint-NN_title/sprint.md folders (exclude --done folders)
+                for sprint_dir in search_path.glob(f"**/sprint-{sprint_num:02d}_*"):
+                    if sprint_dir.is_dir() and "--done" not in sprint_dir.name:
+                        if (sprint_dir / "sprint.md").exists():
+                            sprint_file = sprint_dir / "sprint.md"
+                            already_in_progress = True
+                            break
 
     if not sprint_file:
         raise FileOperationError(

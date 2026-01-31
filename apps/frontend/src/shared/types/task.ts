@@ -4,6 +4,7 @@
 
 import type { ThinkingLevel, PhaseModelConfig, PhaseThinkingConfig } from './settings';
 import type { ExecutionPhase as ExecutionPhaseType, CompletablePhase } from '../constants/phase-protocol';
+import type { PipelineType } from '../constants/task';
 
 export type TaskStatus = 'backlog' | 'queue' | 'in_progress' | 'ai_review' | 'human_review' | 'done' | 'pr_created' | 'error';
 
@@ -155,6 +156,8 @@ export interface TaskDraft {
   referencedFiles: ReferencedFile[];
   requireReviewBeforeCoding?: boolean;
   savedAt: Date;
+  // Pipeline type selection
+  pipelineType?: PipelineType;  // 'autonomous' (default) or 'maestro'
 }
 
 // Epic summary for UI display (Maestro-style work organization)
@@ -253,6 +256,16 @@ export interface TaskMetadata {
 
   // Epic association (Maestro-style work organization)
   epicNumber?: number;  // Epic number this task belongs to (optional)
+
+  // Pipeline type (autonomous vs maestro)
+  pipelineType?: PipelineType;  // 'autonomous' (default) or 'maestro'
+
+  // Maestro workflow state (only for pipelineType === 'maestro')
+  maestroPhase?: string;  // Current Maestro phase (1-6)
+  maestroStep?: string;  // Current step within phase (e.g., "2.3")
+  maestroCompletedSteps?: string[];  // List of completed step IDs
+  sprintFile?: string;  // Path to sprint.md file for Maestro tasks
+  sprintType?: string;  // Sprint type for coverage thresholds (backend, fullstack, etc.)
 }
 
 export interface Task {

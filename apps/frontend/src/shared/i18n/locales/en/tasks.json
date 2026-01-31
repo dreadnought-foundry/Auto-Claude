@@ -328,5 +328,13 @@
   "referenceImages": {
     "title": "Reference Images (optional)",
     "description": "Add visual references like screenshots or designs to help the AI understand your requirements."
+  },
+  "pipelines": {
+    "title": "Pipeline Type",
+    "autonomous": "Autonomous",
+    "autonomousDesc": "AI agents handle everything automatically. Higher token usage, faster completion.",
+    "maestro": "Maestro",
+    "maestroDesc": "Guided step-by-step workflow via terminal. Lower token usage, more control.",
+    "maestroProgress": "Phase {{phase}} • Step {{step}}"
   }
 }

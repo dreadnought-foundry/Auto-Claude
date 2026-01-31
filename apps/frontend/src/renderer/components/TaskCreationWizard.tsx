@@ -31,6 +31,10 @@ import {
   DEFAULT_PHASE_MODELS,
   DEFAULT_PHASE_THINKING
 } from '../../shared/constants';
+import {
+  PIPELINE_TYPE_ICONS,
+  type PipelineType
+} from '../../shared/constants/task';
 import { useSettingsStore } from '../stores/settings-store';
 
 interface TaskCreationWizardProps {
@@ -136,6 +140,9 @@ export function TaskCreationWizard({
   // Review setting
   const [requireReviewBeforeCoding, setRequireReviewBeforeCoding] = useState(false);
 
+  // Pipeline type selection (autonomous vs maestro)
+  const [pipelineType, setPipelineType] = useState<PipelineType>('autonomous');
+
   // Draft state
   const [isDraftRestored, setIsDraftRestored] = useState(false);
 
@@ -174,6 +181,7 @@ export function TaskCreationWizard({
         setImages(draft.images);
         setReferencedFiles(draft.referencedFiles ?? []);
         setRequireReviewBeforeCoding(draft.requireReviewBeforeCoding ?? false);
+        setPipelineType(draft.pipelineType ?? 'autonomous');
         setIsDraftRestored(true);
 
         if (draft.category || draft.priority || draft.complexity || draft.impact) {
@@ -196,6 +204,7 @@ export function TaskCreationWizard({
         setImages([]);
         setReferencedFiles([]);
         setRequireReviewBeforeCoding(false);
+        setPipelineType('autonomous');
         setBaseBranch(PROJECT_DEFAULT_BRANCH);
         setUseWorktree(true);
         setIsDraftRestored(false);
@@ -287,8 +296,9 @@ export function TaskCreationWizard({
     images,
     referencedFiles,
     requireReviewBeforeCoding,
+    pipelineType,
     savedAt: new Date()
-  }), [projectId, title, description, category, priority, complexity, impact, profileId, model, thinkingLevel, phaseModels, phaseThinking, images, referencedFiles, requireReviewBeforeCoding]);
+  }), [projectId, title, description, category, priority, complexity, impact, profileId, model, thinkingLevel, phaseModels, phaseThinking, images, referencedFiles, requireReviewBeforeCoding, pipelineType]);
 
   /**
    * Detect @ mention being typed and show autocomplete
@@ -470,6 +480,9 @@ export function TaskCreationWizard({
       // Epic association (Maestro-style work organization)
       if (selectedEpic) metadata.epicNumber = selectedEpic;
 
+      // Pipeline type (autonomous vs maestro)
+      metadata.pipelineType = pipelineType;
+
       const task = await createTask(projectId, title.trim(), description.trim(), metadata);
       if (task) {
         clearDraft(projectId);
@@ -500,6 +513,7 @@ export function TaskCreationWizard({
     setImages([]);
     setReferencedFiles([]);
     setRequireReviewBeforeCoding(false);
+    setPipelineType('autonomous');
     setBaseBranch(PROJECT_DEFAULT_BRANCH);
     setUseWorktree(true);
     setSelectedEpic(null);
@@ -643,6 +657,56 @@ export function TaskCreationWizard({
             <p className="text-sm text-muted-foreground">
               {t('tasks:wizard.worktreeNotice.description')}
             </p>
+          </div>
+        </div>
+
+        {/* Pipeline Type Selector */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-foreground">
+            {t('tasks:pipelines.title')}
+          </Label>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Autonomous Option */}
+            <button
+              type="button"
+              onClick={() => setPipelineType('autonomous')}
+              disabled={isCreating}
+              className={cn(
+                'flex flex-col items-start gap-2 p-4 rounded-lg border-2 transition-all text-left',
+                pipelineType === 'autonomous'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-muted-foreground/50 hover:bg-muted/30'
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{PIPELINE_TYPE_ICONS.autonomous}</span>
+                <span className="font-medium">{t('tasks:pipelines.autonomous')}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('tasks:pipelines.autonomousDesc')}
+              </p>
+            </button>
+
+            {/* Maestro Option */}
+            <button
+              type="button"
+              onClick={() => setPipelineType('maestro')}
+              disabled={isCreating}
+              className={cn(
+                'flex flex-col items-start gap-2 p-4 rounded-lg border-2 transition-all text-left',
+                pipelineType === 'maestro'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-muted-foreground/50 hover:bg-muted/30'
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{PIPELINE_TYPE_ICONS.maestro}</span>
+                <span className="font-medium">{t('tasks:pipelines.maestro')}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t('tasks:pipelines.maestroDesc')}
+              </p>
+            </button>
           </div>
         </div>
 

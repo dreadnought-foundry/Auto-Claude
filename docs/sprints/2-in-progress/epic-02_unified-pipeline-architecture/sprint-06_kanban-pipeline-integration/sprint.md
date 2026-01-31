@@ -1,3 +1,16 @@
+---
+sprint: 6
+title: "Kanban Pipeline Integration"
+epic: 2
+status: in-progress
+created: 2026-01-31T08:11:02Z
+started: 2026-01-31T08:11:02Z
+completed: null
+hours: null
+workflow_version: "3.5.0"
+
+---
+
 # Sprint 6: Kanban Pipeline Integration
 
 ## Overview

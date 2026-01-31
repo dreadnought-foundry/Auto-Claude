@@ -223,6 +223,51 @@ export const ALLOWED_IMAGE_TYPES_DISPLAY = 'PNG, JPEG, GIF, WebP, SVG';
 export const ATTACHMENTS_DIR = 'attachments';
 
 // ============================================
+// Pipeline Types (Autonomous vs Maestro)
+// ============================================
+
+export const PIPELINE_TYPES = ['autonomous', 'maestro'] as const;
+export type PipelineType = typeof PIPELINE_TYPES[number];
+
+export const PIPELINE_TYPE_LABELS: Record<PipelineType, string> = {
+  autonomous: 'pipelines.autonomous',
+  maestro: 'pipelines.maestro'
+};
+
+export const PIPELINE_TYPE_DESCRIPTIONS: Record<PipelineType, string> = {
+  autonomous: 'pipelines.autonomousDesc',
+  maestro: 'pipelines.maestroDesc'
+};
+
+export const PIPELINE_TYPE_ICONS: Record<PipelineType, string> = {
+  autonomous: '🤖',
+  maestro: '🎯'
+};
+
+// Maestro phase to Kanban column mapping
+// Phase 1: Planning -> backlog
+// Phase 2-3: Implementation/Validation -> in_progress
+// Phase 4-5: Documentation/Commit -> ai_review
+// Phase 6: Completion -> human_review -> done
+export const MAESTRO_PHASE_TO_COLUMN: Record<string, TaskStatusColumn> = {
+  '1': 'backlog',
+  '2': 'in_progress',
+  '3': 'in_progress',
+  '4': 'ai_review',
+  '5': 'ai_review',
+  '6': 'human_review'
+};
+
+export const MAESTRO_PHASE_LABELS: Record<string, string> = {
+  '1': 'Planning',
+  '2': 'Implementation',
+  '3': 'Validation',
+  '4': 'Documentation',
+  '5': 'Commit',
+  '6': 'Completion'
+};
+
+// ============================================
 // JSON Error Markers
 // ============================================
 
