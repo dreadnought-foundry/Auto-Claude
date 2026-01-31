@@ -7,10 +7,10 @@
 | Sprint | 5 |
 | Title | Unified State System |
 | Epic | 2 - Unified Pipeline Architecture |
-| Status | Planning |
+| Status | In Progress |
 | Type | backend |
 | Created | 2026-01-30 |
-| Started | - |
+| Started | 2026-01-30 |
 | Completed | - |
 
 ## Goal

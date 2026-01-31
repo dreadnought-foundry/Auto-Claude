@@ -1,10 +1,11 @@
 ---
 epic: 2
 title: "Unified Pipeline Architecture"
-status: planning
+status: in-progress
 created: 2026-01-30
-started: null
+started: 2026-01-30T16:34:29Z
 completed: null
+
 ---
 
 # Epic 2: Unified Pipeline Architecture
